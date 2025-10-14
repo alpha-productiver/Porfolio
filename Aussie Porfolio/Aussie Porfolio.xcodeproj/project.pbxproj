@@ -1,0 +1,649 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F83546912E952B1400852B97 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = F83546902E952B1400852B97 /* RealmSwift */; };
+		F83546952E96863100852B97 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = F83546942E96863100852B97 /* SnapKit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F83546252E8AB7D100852B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F83546062E8AB7CF00852B97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F835460D2E8AB7CF00852B97;
+			remoteInfo = "Aussie Porfolio";
+		};
+		F835462F2E8AB7D100852B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F83546062E8AB7CF00852B97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F835460D2E8AB7CF00852B97;
+			remoteInfo = "Aussie Porfolio";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F835460E2E8AB7CF00852B97 /* Aussie Porfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aussie Porfolio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F83546242E8AB7D100852B97 /* Aussie PorfolioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aussie PorfolioTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F835462E2E8AB7D100852B97 /* Aussie PorfolioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aussie PorfolioUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F83546362E8AB7D100852B97 /* Exceptions for "Aussie Porfolio" folder in "Aussie Porfolio" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F835460D2E8AB7CF00852B97 /* Aussie Porfolio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F83546102E8AB7CF00852B97 /* Aussie Porfolio */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F83546362E8AB7D100852B97 /* Exceptions for "Aussie Porfolio" folder in "Aussie Porfolio" target */,
+			);
+			path = "Aussie Porfolio";
+			sourceTree = "<group>";
+		};
+		F83546272E8AB7D100852B97 /* Aussie PorfolioTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Aussie PorfolioTests";
+			sourceTree = "<group>";
+		};
+		F83546312E8AB7D100852B97 /* Aussie PorfolioUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Aussie PorfolioUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F835460B2E8AB7CF00852B97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F83546912E952B1400852B97 /* RealmSwift in Frameworks */,
+				F83546952E96863100852B97 /* SnapKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F83546212E8AB7D100852B97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F835462B2E8AB7D100852B97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F83546052E8AB7CF00852B97 = {
+			isa = PBXGroup;
+			children = (
+				F83546102E8AB7CF00852B97 /* Aussie Porfolio */,
+				F83546272E8AB7D100852B97 /* Aussie PorfolioTests */,
+				F83546312E8AB7D100852B97 /* Aussie PorfolioUITests */,
+				F83546932E96863100852B97 /* Frameworks */,
+				F835460F2E8AB7CF00852B97 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F835460F2E8AB7CF00852B97 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F835460E2E8AB7CF00852B97 /* Aussie Porfolio.app */,
+				F83546242E8AB7D100852B97 /* Aussie PorfolioTests.xctest */,
+				F835462E2E8AB7D100852B97 /* Aussie PorfolioUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F83546932E96863100852B97 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F835460D2E8AB7CF00852B97 /* Aussie Porfolio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F83546372E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie Porfolio" */;
+			buildPhases = (
+				F835460A2E8AB7CF00852B97 /* Sources */,
+				F835460B2E8AB7CF00852B97 /* Frameworks */,
+				F835460C2E8AB7CF00852B97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F83546102E8AB7CF00852B97 /* Aussie Porfolio */,
+			);
+			name = "Aussie Porfolio";
+			packageProductDependencies = (
+				F83546902E952B1400852B97 /* RealmSwift */,
+				F83546942E96863100852B97 /* SnapKit */,
+			);
+			productName = "Aussie Porfolio";
+			productReference = F835460E2E8AB7CF00852B97 /* Aussie Porfolio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F83546232E8AB7D100852B97 /* Aussie PorfolioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F835463C2E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie PorfolioTests" */;
+			buildPhases = (
+				F83546202E8AB7D100852B97 /* Sources */,
+				F83546212E8AB7D100852B97 /* Frameworks */,
+				F83546222E8AB7D100852B97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F83546262E8AB7D100852B97 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F83546272E8AB7D100852B97 /* Aussie PorfolioTests */,
+			);
+			name = "Aussie PorfolioTests";
+			packageProductDependencies = (
+			);
+			productName = "Aussie PorfolioTests";
+			productReference = F83546242E8AB7D100852B97 /* Aussie PorfolioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F835462D2E8AB7D100852B97 /* Aussie PorfolioUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F835463F2E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie PorfolioUITests" */;
+			buildPhases = (
+				F835462A2E8AB7D100852B97 /* Sources */,
+				F835462B2E8AB7D100852B97 /* Frameworks */,
+				F835462C2E8AB7D100852B97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F83546302E8AB7D100852B97 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F83546312E8AB7D100852B97 /* Aussie PorfolioUITests */,
+			);
+			name = "Aussie PorfolioUITests";
+			packageProductDependencies = (
+			);
+			productName = "Aussie PorfolioUITests";
+			productReference = F835462E2E8AB7D100852B97 /* Aussie PorfolioUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F83546062E8AB7CF00852B97 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					F835460D2E8AB7CF00852B97 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					F83546232E8AB7D100852B97 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = F835460D2E8AB7CF00852B97;
+					};
+					F835462D2E8AB7D100852B97 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = F835460D2E8AB7CF00852B97;
+					};
+				};
+			};
+			buildConfigurationList = F83546092E8AB7CF00852B97 /* Build configuration list for PBXProject "Aussie Porfolio" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F83546052E8AB7CF00852B97;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F835468D2E952B1400852B97 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				F83546922E967CC200852B97 /* XCRemoteSwiftPackageReference "SnapKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F835460F2E8AB7CF00852B97 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F835460D2E8AB7CF00852B97 /* Aussie Porfolio */,
+				F83546232E8AB7D100852B97 /* Aussie PorfolioTests */,
+				F835462D2E8AB7D100852B97 /* Aussie PorfolioUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F835460C2E8AB7CF00852B97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F83546222E8AB7D100852B97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F835462C2E8AB7D100852B97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F835460A2E8AB7CF00852B97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F83546202E8AB7D100852B97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F835462A2E8AB7D100852B97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F83546262E8AB7D100852B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F835460D2E8AB7CF00852B97 /* Aussie Porfolio */;
+			targetProxy = F83546252E8AB7D100852B97 /* PBXContainerItemProxy */;
+		};
+		F83546302E8AB7D100852B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F835460D2E8AB7CF00852B97 /* Aussie Porfolio */;
+			targetProxy = F835462F2E8AB7D100852B97 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F83546382E8AB7D100852B97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Aussie Porfolio/Info.plist";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-Porfolio";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F83546392E8AB7D100852B97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Aussie Porfolio/Info.plist";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-Porfolio";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F835463A2E8AB7D100852B97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F835463B2E8AB7D100852B97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F835463D2E8AB7D100852B97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-PorfolioTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Aussie Porfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Aussie Porfolio";
+			};
+			name = Debug;
+		};
+		F835463E2E8AB7D100852B97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-PorfolioTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Aussie Porfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Aussie Porfolio";
+			};
+			name = Release;
+		};
+		F83546402E8AB7D100852B97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-PorfolioUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Aussie Porfolio";
+			};
+			name = Debug;
+		};
+		F83546412E8AB7D100852B97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A3MVLCSBDW;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zibolin.Aussie-PorfolioUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Aussie Porfolio";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F83546092E8AB7CF00852B97 /* Build configuration list for PBXProject "Aussie Porfolio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F835463A2E8AB7D100852B97 /* Debug */,
+				F835463B2E8AB7D100852B97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F83546372E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie Porfolio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F83546382E8AB7D100852B97 /* Debug */,
+				F83546392E8AB7D100852B97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F835463C2E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie PorfolioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F835463D2E8AB7D100852B97 /* Debug */,
+				F835463E2E8AB7D100852B97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F835463F2E8AB7D100852B97 /* Build configuration list for PBXNativeTarget "Aussie PorfolioUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F83546402E8AB7D100852B97 /* Debug */,
+				F83546412E8AB7D100852B97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F835468D2E952B1400852B97 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		F83546922E967CC200852B97 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F83546902E952B1400852B97 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F835468D2E952B1400852B97 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+		F83546942E96863100852B97 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F83546922E967CC200852B97 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F83546062E8AB7CF00852B97 /* Project object */;
+}
