@@ -233,7 +233,7 @@ class PropertyTableViewCell: UITableViewCell {
     
     func configure(with property: Property) {
         nameLabel.text = property.name
-        addressLabel.text = "\(property.suburb), \(property.state) \(property.postcode)"
+        addressLabel.text = "\(property.suburb) \(property.state) \(property.postcode)"
         valueLabel.text = "$\(Int(property.currentValue).formattedWithSeparator())"
         equityLabel.text = "Equity: $\(Int(property.equity).formattedWithSeparator())"
     }

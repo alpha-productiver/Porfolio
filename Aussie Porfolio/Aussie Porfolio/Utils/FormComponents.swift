@@ -40,12 +40,21 @@ final class LabeledField: UIStackView {
         titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
         titleLabel.textColor = .secondaryLabel
 
-        textField.borderStyle = .roundedRect
+        textField.borderStyle = .none
         textField.placeholder = placeholder
         textField.keyboardType = keyboard
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .words
         textField.clearButtonMode = .whileEditing
+        textField.backgroundColor = .systemBackground
+        textField.layer.cornerRadius = 8
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.separator.cgColor
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 40))
+        textField.leftViewMode = .always
+        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 40))
+        textField.rightViewMode = .always
         textField.heightAnchor.constraint(equalToConstant: 40).isActive = true
 
         addArrangedSubview(titleLabel)

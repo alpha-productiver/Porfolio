@@ -13,19 +13,21 @@ final class AddPropertyViewController: UIViewController {
     // Property details
     private let addressField = LabeledField(title: "Address",
                                             placeholder: "123 Smith St, Melbourne")
-    private let stateButton: UIButton = {
+    private lazy var stateButton: UIButton = {
         let b = UIButton(type: .system)
         b.translatesAutoresizingMaskIntoConstraints = false
-        b.setTitle("Select state", for: .normal)
-        b.contentHorizontalAlignment = .left
-        b.backgroundColor = .secondarySystemBackground
+        b.setTitle("NSW", for: .normal)
+        b.contentHorizontalAlignment = .center
+        b.backgroundColor = .systemBackground
         b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
         b.titleLabel?.font = .systemFont(ofSize: 15)
         b.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        b.widthAnchor.constraint(equalToConstant: 70).isActive = true
         return b
     }()
-    private var selectedState: StateAU?
+    private var selectedState: StateAU = .NSW
 
     // Financial details
     private let purchaseField = LabeledField(title: "Purchase Value ($)",
@@ -112,19 +114,24 @@ final class AddPropertyViewController: UIViewController {
 
         // Property Details
         contentStack.addArrangedSubview(FormSectionHeader("Property Details"))
-        contentStack.addArrangedSubview(addressField)
-        let stateStack = UIStackView(arrangedSubviews: [
-            {
-                let l = UILabel()
-                l.text = "State"
-                l.font = .systemFont(ofSize: 13, weight: .medium)
-                l.textColor = .secondaryLabel
-                return l
-            }(),
-            stateButton
-        ])
-        stateStack.axis = .vertical; stateStack.spacing = 6
-        contentStack.addArrangedSubview(stateStack)
+
+        // Address and State on same line
+        let stateStack = UIStackView()
+        stateStack.axis = .vertical
+        stateStack.spacing = 6
+        let stateLabel = UILabel()
+        stateLabel.text = "State"
+        stateLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        stateLabel.textColor = .secondaryLabel
+        stateStack.addArrangedSubview(stateLabel)
+        stateStack.addArrangedSubview(stateButton)
+
+        let addressStateRow = UIStackView(arrangedSubviews: [addressField, stateStack])
+        addressStateRow.axis = .horizontal
+        addressStateRow.spacing = 12
+        addressStateRow.alignment = .fill
+        addressStateRow.distribution = .fill
+        contentStack.addArrangedSubview(addressStateRow)
 
         contentStack.addArrangedSubview(Divider())
 
@@ -204,9 +211,7 @@ final class AddPropertyViewController: UIViewController {
         guard let addr = addressField.textField.text, !addr.isEmpty else {
             showAlert("Please enter an address."); return
         }
-        guard let state = selectedState else {
-            showAlert("Please select a state."); return
-        }
+        let state = selectedState
         guard let purchase = Decimal(string: purchaseField.textField.text ?? ""), purchase > 0 else {
             showAlert("Please enter a valid purchase value."); return
         }
