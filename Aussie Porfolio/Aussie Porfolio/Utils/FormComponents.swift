@@ -24,6 +24,94 @@ final class Divider: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
+// MARK: - Asset Card Data Protocol
+
+protocol AssetCardData {
+    var cardTitle: String { get }
+    var cardSubtitle: String { get }
+    var cardValue: String { get }
+    var cardDetail: String { get }
+}
+
+// MARK: - Asset Card View
+
+final class AssetCardView: UIView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .label
+        return label
+    }()
+
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+
+    private let valueLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.textColor = .systemGreen
+        return label
+    }()
+
+    private let detailLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .tertiaryLabel
+        return label
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupView()
+    }
+
+    private func setupView() {
+        backgroundColor = .clear
+
+        addSubview(titleLabel)
+        addSubview(subtitleLabel)
+        addSubview(valueLabel)
+        addSubview(detailLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            subtitleLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+
+            valueLabel.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 8),
+            valueLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+
+            detailLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 4),
+            detailLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            detailLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
+        ])
+    }
+
+    func configure(with data: AssetCardData) {
+        titleLabel.text = data.cardTitle
+        subtitleLabel.text = data.cardSubtitle
+        valueLabel.text = data.cardValue
+        detailLabel.text = data.cardDetail
+    }
+}
+
 // MARK: - Labeled Field
 
 final class LabeledField: UIStackView {

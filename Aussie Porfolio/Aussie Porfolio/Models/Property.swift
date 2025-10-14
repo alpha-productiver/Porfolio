@@ -40,3 +40,23 @@ class PropertyLoan: Object {
         return amount * (interestRate / 100)
     }
 }
+
+// MARK: - AssetCardData Conformance
+
+extension Property: AssetCardData {
+    var cardTitle: String {
+        return name
+    }
+
+    var cardSubtitle: String {
+        return "\(suburb) \(state) \(postcode)"
+    }
+
+    var cardValue: String {
+        return "$\(Int(currentValue).formattedWithSeparator())"
+    }
+
+    var cardDetail: String {
+        return "Equity: $\(Int(equity).formattedWithSeparator())"
+    }
+}

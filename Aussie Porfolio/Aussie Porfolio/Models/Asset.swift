@@ -15,9 +15,31 @@ class Asset: Object {
     var gainLoss: Double {
         return value - purchasePrice
     }
-    
+
     var gainLossPercentage: Double {
         guard purchasePrice > 0 else { return 0 }
         return ((value - purchasePrice) / purchasePrice) * 100
+    }
+}
+
+// MARK: - AssetCardData Conformance
+
+extension Asset: AssetCardData {
+    var cardTitle: String {
+        return name
+    }
+
+    var cardSubtitle: String {
+        return type.capitalized
+    }
+
+    var cardValue: String {
+        return "$\(Int(value).formattedWithSeparator())"
+    }
+
+    var cardDetail: String {
+        let gain = gainLoss
+        let sign = gain >= 0 ? "+" : ""
+        return "Gain/Loss: \(sign)$\(Int(abs(gain)).formattedWithSeparator())"
     }
 }

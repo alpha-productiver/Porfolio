@@ -165,76 +165,32 @@ extension PropertiesViewController: UITableViewDelegate {
 }
 
 class PropertyTableViewCell: UITableViewCell {
-    private let nameLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        return label
-    }()
-    
-    private let addressLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = .secondaryLabel
-        return label
-    }()
-    
-    private let valueLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 18, weight: .bold)
-        label.textColor = .systemGreen
-        return label
-    }()
-    
-    private let equityLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 12)
-        label.textColor = .tertiaryLabel
-        return label
-    }()
-    
+    private let assetCardView = AssetCardView()
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupViews() {
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(addressLabel)
-        contentView.addSubview(valueLabel)
-        contentView.addSubview(equityLabel)
-        
+        assetCardView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(assetCardView)
+
         NSLayoutConstraint.activate([
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            
-            addressLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            addressLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            addressLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
-            
-            valueLabel.topAnchor.constraint(equalTo: addressLabel.bottomAnchor, constant: 8),
-            valueLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            
-            equityLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 4),
-            equityLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            equityLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+            assetCardView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            assetCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            assetCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            assetCardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
-        
+
         accessoryType = .disclosureIndicator
     }
-    
+
     func configure(with property: Property) {
-        nameLabel.text = property.name
-        addressLabel.text = "\(property.suburb) \(property.state) \(property.postcode)"
-        valueLabel.text = "$\(Int(property.currentValue).formattedWithSeparator())"
-        equityLabel.text = "Equity: $\(Int(property.equity).formattedWithSeparator())"
+        assetCardView.configure(with: property)
     }
 }
