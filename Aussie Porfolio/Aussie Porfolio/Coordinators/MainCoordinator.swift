@@ -87,8 +87,10 @@ class MainCoordinator: Coordinator {
     
     private func createAssetsNavigationController() -> UINavigationController {
         let assetsVC = AssetsViewController()
+        let viewModel = AssetViewModel()
+        assetsVC.viewModel = viewModel
         assetsVC.coordinator = self
-        
+
         let navController = UINavigationController(rootViewController: assetsVC)
         navController.tabBarItem = UITabBarItem(
             title: "Assets",
@@ -96,7 +98,7 @@ class MainCoordinator: Coordinator {
             selectedImage: UIImage(systemName: "dollarsign.circle.fill")
         )
         navController.navigationBar.prefersLargeTitles = true
-        
+
         return navController
     }
     
@@ -174,6 +176,42 @@ class MainCoordinator: Coordinator {
         tabBarController?.present(nav, animated: true)
     }
 
+    func showAssetDetail(_ asset: Asset) {
+        let vm = AssetViewModel()
+        let vc = AddAssetViewController(viewModel: vm, assetToEdit: asset)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
+    func showAddAsset() {
+        let vm = AssetViewModel()
+        let vc = AddAssetViewController(viewModel: vm)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
     // MARK: - Tab Navigation
 
     func showProperties() {
@@ -202,8 +240,8 @@ class MainCoordinator: Coordinator {
             self?.showAddProperty()
         })
 
-        alert.addAction(UIAlertAction(title: "Asset", style: .default) { _ in
-            // TODO: Implement showAddAsset()
+        alert.addAction(UIAlertAction(title: "Asset", style: .default) { [weak self] _ in
+            self?.showAddAsset()
         })
 
         alert.addAction(UIAlertAction(title: "Cash Account", style: .default) { _ in

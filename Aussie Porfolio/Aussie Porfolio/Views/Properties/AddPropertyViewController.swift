@@ -31,7 +31,7 @@ final class AddPropertyViewController: UIViewController {
 
     // Financial details
     private let purchaseField = LabeledField(title: "Purchase Value ($)",
-                                             placeholder: "750000",
+                                             placeholder: "750,000",
                                              keyboard: .numberPad)
     private let currentValueField = LabeledField(title: "Current Value ($)",
                                                  placeholder: "Leave empty to use purchase price",
@@ -179,6 +179,24 @@ final class AddPropertyViewController: UIViewController {
             tb.items = [flex, done]
             tf.inputAccessoryView = tb
         }
+
+        // Set delegate for currency fields to add comma formatting
+        purchaseField.textField.delegate = self
+        purchaseField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
+        currentValueField.textField.delegate = self
+        currentValueField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
+        loanAmountField.textField.delegate = self
+        loanAmountField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
+    }
+
+    @objc private func currencyFieldDidChange(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+
+        // Remove commas and format with commas
+        let numbersOnly = text.replacingOccurrences(of: ",", with: "")
+        if let number = Int(numbersOnly) {
+            textField.text = number.formattedWithSeparator()
+        }
     }
 
     private func populateFieldsIfEditing() {
@@ -191,11 +209,11 @@ final class AddPropertyViewController: UIViewController {
             stateButton.setTitle(state.rawValue, for: .normal)
         }
 
-        purchaseField.textField.text = "\(Int(property.purchasePrice))"
-        currentValueField.textField.text = "\(Int(property.currentValue))"
+        purchaseField.textField.text = Int(property.purchasePrice).formattedWithSeparator()
+        currentValueField.textField.text = Int(property.currentValue).formattedWithSeparator()
 
         if let loan = property.loan {
-            loanAmountField.textField.text = "\(Int(loan.amount))"
+            loanAmountField.textField.text = Int(loan.amount).formattedWithSeparator()
             interestRateField.textField.text = "\(loan.interestRate)"
         }
     }
@@ -212,13 +230,17 @@ final class AddPropertyViewController: UIViewController {
             showAlert("Please enter an address."); return
         }
         let state = selectedState
-        guard let purchase = Decimal(string: purchaseField.textField.text ?? ""), purchase > 0 else {
+
+        // Strip commas before parsing
+        let purchaseText = purchaseField.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
+        guard let purchase = Decimal(string: purchaseText), purchase > 0 else {
             showAlert("Please enter a valid purchase value."); return
         }
 
         let purchaseValue = NSDecimalNumber(decimal: purchase).doubleValue
         let currentValue: Double
-        if let cv = Decimal(string: currentValueField.textField.text ?? ""), cv > 0 {
+        let currentValueText = currentValueField.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
+        if let cv = Decimal(string: currentValueText), cv > 0 {
             currentValue = NSDecimalNumber(decimal: cv).doubleValue
         } else {
             currentValue = purchaseValue
@@ -227,19 +249,20 @@ final class AddPropertyViewController: UIViewController {
         // Validate loan if amount is provided
         var loanData: (amount: Double, interestRate: Double)? = nil
         if let loanAmountText = loanAmountField.textField.text,
-           !loanAmountText.isEmpty,
-           let amt = Decimal(string: loanAmountText),
-           amt > 0 {
+           !loanAmountText.isEmpty {
+            let loanAmountClean = loanAmountText.replacingOccurrences(of: ",", with: "")
+            if let amt = Decimal(string: loanAmountClean), amt > 0 {
 
-            // If loan amount is entered, interest rate is required
-            guard let interestRateText = interestRateField.textField.text,
-                  !interestRateText.isEmpty,
-                  let ir = Decimal(string: interestRateText),
-                  ir > 0 else {
-                showAlert("Please enter an interest rate for the loan."); return
+                // If loan amount is entered, interest rate is required
+                guard let interestRateText = interestRateField.textField.text,
+                      !interestRateText.isEmpty,
+                      let ir = Decimal(string: interestRateText),
+                      ir > 0 else {
+                    showAlert("Please enter an interest rate for the loan."); return
+                }
+
+                loanData = (NSDecimalNumber(decimal: amt).doubleValue, NSDecimalNumber(decimal: ir).doubleValue)
             }
-
-            loanData = (NSDecimalNumber(decimal: amt).doubleValue, NSDecimalNumber(decimal: ir).doubleValue)
         }
 
         // Handle edit vs add
@@ -279,4 +302,10 @@ final class AddPropertyViewController: UIViewController {
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
     }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension AddPropertyViewController: UITextFieldDelegate {
+    // Allow editing to proceed as normal
 }
