@@ -8,7 +8,7 @@ final class LVRCardView: UIView {
     private let assetLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .semibold)
-        label.textColor = .systemGreen
+        label.textColor = .systemBlue
         label.textAlignment = .center
         return label
     }()

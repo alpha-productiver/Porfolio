@@ -65,11 +65,29 @@ extension Property: AssetCardData {
     }
 
     var cardDetailAttributedString: NSAttributedString? {
-        return nil
+        let equityText = "$\(Int(equity).formattedWithSeparator())"
+
+        let attributedString = NSMutableAttributedString(
+            string: "Equity: ",
+            attributes: [
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.secondaryLabel
+            ]
+        )
+
+        attributedString.append(NSAttributedString(
+            string: equityText,
+            attributes: [
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.systemGreen
+            ]
+        ))
+
+        return attributedString
     }
 
     var cardValueColor: UIColor {
-        return .systemGreen
+        return .systemBlue
     }
 
     var cardDetailColor: UIColor {

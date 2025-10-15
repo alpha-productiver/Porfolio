@@ -135,14 +135,17 @@ final class DashboardViewController: UIViewController {
 
         // Properties
         propertiesCard.valueLabel.text = viewModel.propertiesValueText
+        propertiesCard.valueLabel.textColor = .systemBlue
         propertiesCard.subtitleLabel.text = viewModel.propertiesCountText
 
         // Assets
         assetsCard.valueLabel.text = viewModel.assetsValueText
+        assetsCard.valueLabel.textColor = .systemGreen
         assetsCard.subtitleLabel.text = viewModel.assetsCountText
 
         // Cash
         cashCard.valueLabel.text = viewModel.cashValueText
+        cashCard.valueLabel.textColor = .systemGreen
         cashCard.subtitleLabel.text = viewModel.cashCountText
 
         // Allocation

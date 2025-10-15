@@ -85,4 +85,22 @@ class PropertyViewModel {
     deinit {
         notificationToken?.invalidate()
     }
+
+    // MARK: - Computed Properties
+
+    var totalPropertyValue: Double {
+        return properties.reduce(0) { $0 + $1.currentValue }
+    }
+
+    var totalEquity: Double {
+        return properties.reduce(0) { $0 + $1.equity }
+    }
+
+    var totalPropertyValueText: String {
+        return "$\(Int(totalPropertyValue).formattedWithSeparator())"
+    }
+
+    var totalEquityText: String {
+        return "$\(Int(totalEquity).formattedWithSeparator())"
+    }
 }

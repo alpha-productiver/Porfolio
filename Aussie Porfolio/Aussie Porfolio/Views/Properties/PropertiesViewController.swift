@@ -3,7 +3,9 @@ import UIKit
 class PropertiesViewController: UIViewController {
     var viewModel: PropertyViewModel!
     weak var coordinator: MainCoordinator?
-    
+
+    private let summaryHeaderView = SummaryHeaderView()
+
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.translatesAutoresizingMaskIntoConstraints = false
@@ -65,22 +67,27 @@ class PropertiesViewController: UIViewController {
     private func setupUI() {
         title = "Properties"
         view.backgroundColor = UIColor.systemGroupedBackground
-        
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addPropertyTapped)
         )
-        
+
+        view.addSubview(summaryHeaderView)
         view.addSubview(tableView)
         view.addSubview(emptyStateView)
-        
+
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            summaryHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            summaryHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            summaryHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            tableView.topAnchor.constraint(equalTo: summaryHeaderView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
+
             emptyStateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -99,8 +106,26 @@ class PropertiesViewController: UIViewController {
 
     private func updateUI() {
         tableView.reloadData()
-        emptyStateView.isHidden = !viewModel.properties.isEmpty
-        tableView.isHidden = viewModel.properties.isEmpty
+        let hasProperties = !viewModel.properties.isEmpty
+
+        emptyStateView.isHidden = hasProperties
+        tableView.isHidden = !hasProperties
+        summaryHeaderView.isHidden = !hasProperties
+
+        if hasProperties {
+            summaryHeaderView.configure(with: [
+                SummaryHeaderView.SummaryItem(
+                    title: "Total Property Value",
+                    value: viewModel.totalPropertyValueText,
+                    color: .systemBlue
+                ),
+                SummaryHeaderView.SummaryItem(
+                    title: "Total Equity",
+                    value: viewModel.totalEquityText,
+                    color: .systemGreen
+                )
+            ])
+        }
     }
     
     @objc private func addPropertyTapped() {

@@ -120,6 +120,97 @@ final class AssetCardView: UIView {
     }
 }
 
+// MARK: - Summary Header View
+
+final class SummaryHeaderView: UIView {
+    struct SummaryItem {
+        let title: String
+        let value: String
+        let color: UIColor
+    }
+
+    private let stackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fillEqually
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupView()
+    }
+
+    private func setupView() {
+        backgroundColor = .clear
+        translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(stackView)
+
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
+        ])
+    }
+
+    func configure(with items: [SummaryItem]) {
+        // Remove existing arranged subviews
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        // Add new items
+        items.forEach { item in
+            let itemView = createItemView(for: item)
+            stackView.addArrangedSubview(itemView)
+        }
+    }
+
+    private func createItemView(for item: SummaryItem) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .secondarySystemGroupedBackground
+        container.layer.cornerRadius = 12
+        container.layer.masksToBounds = true
+
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = item.title
+        titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        titleLabel.textColor = .secondaryLabel
+        titleLabel.textAlignment = .center
+
+        let valueLabel = UILabel()
+        valueLabel.translatesAutoresizingMaskIntoConstraints = false
+        valueLabel.text = item.value
+        valueLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        valueLabel.textColor = item.color
+        valueLabel.textAlignment = .center
+
+        container.addSubview(titleLabel)
+        container.addSubview(valueLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+
+            valueLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            valueLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            valueLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            valueLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+        ])
+
+        return container
+    }
+}
+
 // MARK: - Labeled Field
 
 final class LabeledField: UIStackView {

@@ -92,7 +92,12 @@ class DashboardViewModel {
         totalPropertyValue = properties.reduce(0) { $0 + $1.currentValue }
         totalAssetValue = assets.reduce(0) { $0 + $1.value }
         totalCashValue = cashAccounts.reduce(0) { $0 + $1.balance }
-        totalLiabilities = liabilities.reduce(0) { $0 + $1.balance }
+
+        // Total liabilities = standalone liabilities + property mortgages
+        let standaloneLiabilities = liabilities.reduce(0) { $0 + $1.balance }
+        let totalPropertyLoans = properties.reduce(0) { $0 + ($1.loan?.amount ?? 0) }
+        totalLiabilities = standaloneLiabilities + totalPropertyLoans
+
         totalPortfolioValue = totalPropertyValue + totalAssetValue + totalCashValue
         netWorth = totalPortfolioValue - totalLiabilities
 
@@ -111,7 +116,9 @@ class DashboardViewModel {
 
         // Liabilities
         liabilitiesText = formatCurrency(totalLiabilities)
-        liabilitiesSubtitleText = liabilities.isEmpty ? "No liabilities recorded" : "\(liabilities.count) liabilities"
+        let propertyLoansCount = properties.filter { $0.loan != nil }.count
+        let totalLiabilityCount = liabilities.count + propertyLoansCount
+        liabilitiesSubtitleText = totalLiabilityCount == 0 ? "No liabilities recorded" : "Includes \(propertyLoansCount) mortgages"
 
         // Properties
         propertiesValueText = formatCurrency(totalPropertyValue)
