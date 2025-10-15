@@ -104,8 +104,10 @@ class MainCoordinator: Coordinator {
     
     private func createCashNavigationController() -> UINavigationController {
         let cashVC = CashAccountsViewController()
+        let viewModel = CashAccountViewModel()
+        cashVC.viewModel = viewModel
         cashVC.coordinator = self
-        
+
         let navController = UINavigationController(rootViewController: cashVC)
         navController.tabBarItem = UITabBarItem(
             title: "Cash",
@@ -113,14 +115,16 @@ class MainCoordinator: Coordinator {
             selectedImage: UIImage(systemName: "banknote.fill")
         )
         navController.navigationBar.prefersLargeTitles = true
-        
+
         return navController
     }
     
     private func createLiabilitiesNavigationController() -> UINavigationController {
         let liabilitiesVC = LiabilitiesViewController()
+        let viewModel = LiabilityViewModel()
+        liabilitiesVC.viewModel = viewModel
         liabilitiesVC.coordinator = self
-        
+
         let navController = UINavigationController(rootViewController: liabilitiesVC)
         navController.tabBarItem = UITabBarItem(
             title: "Liabilities",
@@ -128,7 +132,7 @@ class MainCoordinator: Coordinator {
             selectedImage: UIImage(systemName: "creditcard.fill")
         )
         navController.navigationBar.prefersLargeTitles = true
-        
+
         return navController
     }
     
@@ -212,6 +216,78 @@ class MainCoordinator: Coordinator {
         tabBarController?.present(nav, animated: true)
     }
 
+    func showCashAccountDetail(_ account: CashAccount) {
+        let vm = CashAccountViewModel()
+        let vc = AddCashAccountViewController(viewModel: vm, accountToEdit: account)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
+    func showAddCashAccount() {
+        let vm = CashAccountViewModel()
+        let vc = AddCashAccountViewController(viewModel: vm)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
+    func showLiabilityDetail(_ liability: Liability) {
+        let vm = LiabilityViewModel()
+        let vc = AddLiabilityViewController(viewModel: vm, liabilityToEdit: liability)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
+    func showAddLiability() {
+        let vm = LiabilityViewModel()
+        let vc = AddLiabilityViewController(viewModel: vm)
+        vc.coordinator = self
+
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+        } else {
+            nav.modalPresentationStyle = .formSheet
+        }
+        tabBarController?.present(nav, animated: true)
+    }
+
     // MARK: - Tab Navigation
 
     func showProperties() {
@@ -244,12 +320,12 @@ class MainCoordinator: Coordinator {
             self?.showAddAsset()
         })
 
-        alert.addAction(UIAlertAction(title: "Cash Account", style: .default) { _ in
-            // TODO: Implement showAddCashAccount()
+        alert.addAction(UIAlertAction(title: "Cash Account", style: .default) { [weak self] _ in
+            self?.showAddCashAccount()
         })
 
-        alert.addAction(UIAlertAction(title: "Liability", style: .default) { _ in
-            // TODO: Implement showAddLiability()
+        alert.addAction(UIAlertAction(title: "Liability", style: .default) { [weak self] _ in
+            self?.showAddLiability()
         })
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))

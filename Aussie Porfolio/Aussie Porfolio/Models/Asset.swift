@@ -54,7 +54,7 @@ extension Asset: AssetCardData {
             string: "Gain/Loss: ",
             attributes: [
                 .font: UIFont.systemFont(ofSize: 12),
-                .foregroundColor: UIColor.tertiaryLabel
+                .foregroundColor: UIColor.secondaryLabel
             ]
         )
 
@@ -74,6 +74,6 @@ extension Asset: AssetCardData {
     }
 
     var cardDetailColor: UIColor {
-        return .tertiaryLabel
+        return .secondaryLabel
     }
 }

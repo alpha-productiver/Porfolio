@@ -35,22 +35,90 @@ extension Liability: AssetCardData {
     }
 
     var cardDetail: String {
-        if interestRate > 0 {
-            return "Interest Rate: \(String(format: "%.2f", interestRate))%"
-        } else {
-            return "No interest"
+        var parts: [String] = []
+
+        if let dueDate = dueDate {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            parts.append("Due: \(formatter.string(from: dueDate))")
         }
+
+        if interestRate > 0 {
+            parts.append("Interest Rate: \(String(format: "%.2f", interestRate))%")
+        }
+
+        return parts.isEmpty ? "No details" : parts.joined(separator: " • ")
     }
 
     var cardDetailAttributedString: NSAttributedString? {
-        return nil
+        let attributedString = NSMutableAttributedString()
+        var hasContent = false
+
+        // Add due date if available
+        if let dueDate = dueDate {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+
+            attributedString.append(NSAttributedString(
+                string: "Due: ",
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+            ))
+
+            attributedString.append(NSAttributedString(
+                string: formatter.string(from: dueDate),
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.label
+                ]
+            ))
+
+            hasContent = true
+        }
+
+        // Add interest rate if available
+        if interestRate > 0 {
+            if hasContent {
+                attributedString.append(NSAttributedString(
+                    string: " • ",
+                    attributes: [
+                        .font: UIFont.systemFont(ofSize: 12),
+                        .foregroundColor: UIColor.secondaryLabel
+                    ]
+                ))
+            }
+
+            let rateText = "\(String(format: "%.2f", interestRate))%"
+
+            attributedString.append(NSAttributedString(
+                string: "Interest Rate: ",
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+            ))
+
+            attributedString.append(NSAttributedString(
+                string: rateText,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.systemRed
+                ]
+            ))
+
+            hasContent = true
+        }
+
+        return hasContent ? attributedString : nil
     }
 
     var cardValueColor: UIColor {
-        return .systemGreen
+        return .systemRed
     }
 
     var cardDetailColor: UIColor {
-        return .tertiaryLabel
+        return .secondaryLabel
     }
 }

@@ -50,7 +50,10 @@ extension Property: AssetCardData {
     }
 
     var cardSubtitle: String {
-        return "\(suburb) \(state) \(postcode)"
+        let components = [suburb.trimmingCharacters(in: .whitespaces),
+                         state.trimmingCharacters(in: .whitespaces),
+                         postcode.trimmingCharacters(in: .whitespaces)]
+        return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
 
     var cardValue: String {
@@ -70,6 +73,6 @@ extension Property: AssetCardData {
     }
 
     var cardDetailColor: UIColor {
-        return .tertiaryLabel
+        return .secondaryLabel
     }
 }

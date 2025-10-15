@@ -26,7 +26,7 @@ extension CashAccount: AssetCardData {
     }
 
     var cardSubtitle: String {
-        return "\(accountType.capitalized) • \(institution)"
+        return institution
     }
 
     var cardValue: String {
@@ -42,7 +42,29 @@ extension CashAccount: AssetCardData {
     }
 
     var cardDetailAttributedString: NSAttributedString? {
-        return nil
+        if interestRate > 0 {
+            let rateText = "\(String(format: "%.2f", interestRate))%"
+
+            let attributedString = NSMutableAttributedString(
+                string: "Interest Rate: ",
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+            )
+
+            attributedString.append(NSAttributedString(
+                string: rateText,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.systemGreen
+                ]
+            ))
+
+            return attributedString
+        } else {
+            return nil
+        }
     }
 
     var cardValueColor: UIColor {
@@ -50,6 +72,6 @@ extension CashAccount: AssetCardData {
     }
 
     var cardDetailColor: UIColor {
-        return .tertiaryLabel
+        return .secondaryLabel
     }
 }
