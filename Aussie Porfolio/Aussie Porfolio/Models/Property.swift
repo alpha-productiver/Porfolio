@@ -1,5 +1,6 @@
 import Foundation
 import RealmSwift
+import UIKit
 
 class Property: Object {
     @Persisted(primaryKey: true) var id = UUID().uuidString
@@ -58,5 +59,17 @@ extension Property: AssetCardData {
 
     var cardDetail: String {
         return "Equity: $\(Int(equity).formattedWithSeparator())"
+    }
+
+    var cardDetailAttributedString: NSAttributedString? {
+        return nil
+    }
+
+    var cardValueColor: UIColor {
+        return .systemGreen
+    }
+
+    var cardDetailColor: UIColor {
+        return .tertiaryLabel
     }
 }

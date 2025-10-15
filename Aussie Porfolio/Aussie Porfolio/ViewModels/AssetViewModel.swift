@@ -1,5 +1,6 @@
 import Foundation
 import RealmSwift
+internal import Realm
 
 final class AssetViewModel {
     private let realm = try! Realm()

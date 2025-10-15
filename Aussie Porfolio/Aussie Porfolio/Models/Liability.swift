@@ -1,5 +1,6 @@
 import Foundation
 import RealmSwift
+import UIKit
 
 class Liability: Object {
     @Persisted(primaryKey: true) var id = UUID().uuidString
@@ -39,5 +40,17 @@ extension Liability: AssetCardData {
         } else {
             return "No interest"
         }
+    }
+
+    var cardDetailAttributedString: NSAttributedString? {
+        return nil
+    }
+
+    var cardValueColor: UIColor {
+        return .systemGreen
+    }
+
+    var cardDetailColor: UIColor {
+        return .tertiaryLabel
     }
 }

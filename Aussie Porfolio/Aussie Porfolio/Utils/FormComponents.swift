@@ -31,6 +31,9 @@ protocol AssetCardData {
     var cardSubtitle: String { get }
     var cardValue: String { get }
     var cardDetail: String { get }
+    var cardDetailAttributedString: NSAttributedString? { get }
+    var cardValueColor: UIColor { get }
+    var cardDetailColor: UIColor { get }
 }
 
 // MARK: - Asset Card View
@@ -56,7 +59,6 @@ final class AssetCardView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 18, weight: .bold)
-        label.textColor = .systemGreen
         return label
     }()
 
@@ -64,7 +66,6 @@ final class AssetCardView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .tertiaryLabel
         return label
     }()
 
@@ -108,7 +109,14 @@ final class AssetCardView: UIView {
         titleLabel.text = data.cardTitle
         subtitleLabel.text = data.cardSubtitle
         valueLabel.text = data.cardValue
-        detailLabel.text = data.cardDetail
+        valueLabel.textColor = data.cardValueColor
+
+        if let attributedDetail = data.cardDetailAttributedString {
+            detailLabel.attributedText = attributedDetail
+        } else {
+            detailLabel.text = data.cardDetail
+            detailLabel.textColor = data.cardDetailColor
+        }
     }
 }
 

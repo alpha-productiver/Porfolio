@@ -1,5 +1,6 @@
 import Foundation
 import RealmSwift
+import UIKit
 
 class Asset: Object {
     @Persisted(primaryKey: true) var id = UUID().uuidString
@@ -39,7 +40,40 @@ extension Asset: AssetCardData {
 
     var cardDetail: String {
         let gain = gainLoss
-        let sign = gain >= 0 ? "+" : ""
+        let sign = gain >= 0 ? "+" : "-"
         return "Gain/Loss: \(sign)$\(Int(abs(gain)).formattedWithSeparator())"
+    }
+
+    var cardDetailAttributedString: NSAttributedString? {
+        let gain = gainLoss
+        let sign = gain >= 0 ? "+" : "-"
+        let valueText = "\(sign)$\(Int(abs(gain)).formattedWithSeparator())"
+        let color = gain >= 0 ? UIColor.systemGreen : UIColor.systemRed
+
+        let attributedString = NSMutableAttributedString(
+            string: "Gain/Loss: ",
+            attributes: [
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.tertiaryLabel
+            ]
+        )
+
+        attributedString.append(NSAttributedString(
+            string: valueText,
+            attributes: [
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: color
+            ]
+        ))
+
+        return attributedString
+    }
+
+    var cardValueColor: UIColor {
+        return gainLoss >= 0 ? .systemGreen : .systemRed
+    }
+
+    var cardDetailColor: UIColor {
+        return .tertiaryLabel
     }
 }
