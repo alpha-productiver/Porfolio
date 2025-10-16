@@ -46,6 +46,7 @@ class DashboardViewModel {
     private var totalAssetValue: Double = 0
     private var totalCashValue: Double = 0
     private var totalLiabilities: Double = 0
+    private var totalPropertyLoans: Double = 0
 
     private let realmService: RealmService
     private var notificationTokens: [NotificationToken] = []
@@ -95,7 +96,7 @@ class DashboardViewModel {
 
         // Total liabilities = standalone liabilities + property mortgages
         let standaloneLiabilities = liabilities.reduce(0) { $0 + $1.balance }
-        let totalPropertyLoans = properties.reduce(0) { $0 + ($1.loan?.amount ?? 0) }
+        totalPropertyLoans = properties.reduce(0) { $0 + ($1.loan?.amount ?? 0) }
         totalLiabilities = standaloneLiabilities + totalPropertyLoans
 
         totalPortfolioValue = totalPropertyValue + totalAssetValue + totalCashValue
@@ -117,27 +118,35 @@ class DashboardViewModel {
         // Liabilities
         liabilitiesText = formatCurrency(totalLiabilities)
         let propertyLoansCount = properties.filter { $0.loan != nil }.count
-        let totalLiabilityCount = liabilities.count + propertyLoansCount
-        liabilitiesSubtitleText = totalLiabilityCount == 0 ? "No liabilities recorded" : "Includes \(propertyLoansCount) mortgages"
+        let standaloneLiabilitiesCount = liabilities.count
+
+        if standaloneLiabilitiesCount == 0 && propertyLoansCount == 0 {
+            liabilitiesSubtitleText = "No liabilities recorded"
+        } else if standaloneLiabilitiesCount == 0 {
+            liabilitiesSubtitleText = "\(propertyLoansCount) \(propertyLoansCount == 1 ? "mortgage" : "mortgages")"
+        } else if propertyLoansCount == 0 {
+            liabilitiesSubtitleText = "\(standaloneLiabilitiesCount) \(standaloneLiabilitiesCount == 1 ? "liability" : "liabilities")"
+        } else {
+            liabilitiesSubtitleText = "\(standaloneLiabilitiesCount) \(standaloneLiabilitiesCount == 1 ? "liability" : "liabilities") + \(propertyLoansCount) \(propertyLoansCount == 1 ? "mortgage" : "mortgages")"
+        }
 
         // Properties
         propertiesValueText = formatCurrency(totalPropertyValue)
-        propertiesCountText = "\(properties.count) properties"
+        propertiesCountText = "\(properties.count) \(properties.count == 1 ? "property" : "properties")"
 
         // Assets
         assetsValueText = formatCurrency(totalAssetValue)
-        assetsCountText = "\(assets.count) assets"
+        assetsCountText = "\(assets.count) \(assets.count == 1 ? "asset" : "assets")"
 
         // Cash
         cashValueText = formatCurrency(totalCashValue)
-        cashCountText = "\(cashAccounts.count) accounts"
+        cashCountText = "\(cashAccounts.count) \(cashAccounts.count == 1 ? "account" : "accounts")"
 
         // Allocation
         let percentage = totalPortfolioValue > 0 ? Int((totalPropertyValue / totalPortfolioValue) * 100) : 0
         allocationPercentageText = "\(percentage)%"
 
-        // LVR (Loan to Value Ratio)
-        let totalPropertyLoans = properties.reduce(0.0) { $0 + ($1.loan?.amount ?? 0) }
+        // LVR (Loan to Value Ratio) - use stored totalPropertyLoans
         if totalPropertyValue > 0 {
             lvrPercentage = (totalPropertyLoans / totalPropertyValue) * 100
         } else {
@@ -166,11 +175,6 @@ class DashboardViewModel {
     
     var totalEquity: Double {
         properties.reduce(0) { $0 + $1.equity }
-    }
-    
-    var availableEquity: Double {
-        let totalLoanAmount = properties.reduce(0) { $0 + ($1.loan?.amount ?? 0) }
-        return totalPropertyValue - totalLoanAmount
     }
     
     var propertyAllocationPercentage: Double {

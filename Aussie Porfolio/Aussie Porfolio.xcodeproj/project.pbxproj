@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		F83546912E952B1400852B97 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = F83546902E952B1400852B97 /* RealmSwift */; };
 		F83546952E96863100852B97 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = F83546942E96863100852B97 /* SnapKit */; };
+		F88F96AF2EA106B7004CE9E5 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = F83546902E952B1400852B97 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +28,20 @@
 			remoteInfo = "Aussie Porfolio";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F88F96B02EA106B7004CE9E5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F88F96AF2EA106B7004CE9E5 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F835460E2E8AB7CF00852B97 /* Aussie Porfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aussie Porfolio.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -130,6 +145,7 @@
 				F835460A2E8AB7CF00852B97 /* Sources */,
 				F835460B2E8AB7CF00852B97 /* Frameworks */,
 				F835460C2E8AB7CF00852B97 /* Resources */,
+				F88F96B02EA106B7004CE9E5 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -318,7 +334,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -351,7 +367,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
