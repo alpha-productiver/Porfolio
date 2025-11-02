@@ -18,8 +18,20 @@ final class Divider: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .separator
-        heightAnchor.constraint(equalToConstant: 1.0 / UIScreen.main.scale).isActive = true
+        backgroundColor = .clear
+
+        let line = UIView()
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.backgroundColor = .separator
+        addSubview(line)
+
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 20),
+            line.centerYAnchor.constraint(equalTo: centerYAnchor),
+            line.leadingAnchor.constraint(equalTo: leadingAnchor),
+            line.trailingAnchor.constraint(equalTo: trailingAnchor),
+            line.heightAnchor.constraint(equalToConstant: 1)
+        ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }

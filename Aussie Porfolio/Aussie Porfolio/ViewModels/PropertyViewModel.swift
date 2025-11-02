@@ -41,7 +41,10 @@ class PropertyViewModel {
                         state: String,
                         purchasePrice: Double,
                         currentValue: Double,
-                        loanData: (amount: Double, interestRate: Double)?) {
+                        loanData: (amount: Double, interestRate: Double)?,
+                        insuranceData: (buildingProvider: String, buildingFrequency: String, buildingAmount: Double, buildingRenewalDate: Date?,
+                                      landlordProvider: String, landlordFrequency: String, landlordAmount: Double, landlordRenewalDate: Date?,
+                                      sameProvider: Bool)? = nil) {
         realmService.update {
             property.name = address
             property.address = address
@@ -69,6 +72,41 @@ class PropertyViewModel {
                 if let existingLoan = property.loan {
                     realmService.realm.delete(existingLoan)
                     property.loan = nil
+                }
+            }
+
+            // Handle insurance
+            if let insurance = insuranceData {
+                if let existingInsurance = property.insurance {
+                    // Update existing insurance
+                    existingInsurance.buildingProvider = insurance.buildingProvider
+                    existingInsurance.buildingFrequency = insurance.buildingFrequency
+                    existingInsurance.buildingAmount = insurance.buildingAmount
+                    existingInsurance.buildingRenewalDate = insurance.buildingRenewalDate
+                    existingInsurance.landlordProvider = insurance.landlordProvider
+                    existingInsurance.landlordFrequency = insurance.landlordFrequency
+                    existingInsurance.landlordAmount = insurance.landlordAmount
+                    existingInsurance.landlordRenewalDate = insurance.landlordRenewalDate
+                    existingInsurance.sameProvider = insurance.sameProvider
+                } else {
+                    // Create new insurance
+                    let newInsurance = PropertyInsurance()
+                    newInsurance.buildingProvider = insurance.buildingProvider
+                    newInsurance.buildingFrequency = insurance.buildingFrequency
+                    newInsurance.buildingAmount = insurance.buildingAmount
+                    newInsurance.buildingRenewalDate = insurance.buildingRenewalDate
+                    newInsurance.landlordProvider = insurance.landlordProvider
+                    newInsurance.landlordFrequency = insurance.landlordFrequency
+                    newInsurance.landlordAmount = insurance.landlordAmount
+                    newInsurance.landlordRenewalDate = insurance.landlordRenewalDate
+                    newInsurance.sameProvider = insurance.sameProvider
+                    property.insurance = newInsurance
+                }
+            } else {
+                // Remove insurance if exists
+                if let existingInsurance = property.insurance {
+                    realmService.realm.delete(existingInsurance)
+                    property.insurance = nil
                 }
             }
         }

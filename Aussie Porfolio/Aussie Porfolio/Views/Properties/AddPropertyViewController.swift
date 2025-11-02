@@ -6,6 +6,30 @@ final class AddPropertyViewController: UIViewController {
     private let viewModel: PropertyViewModel
     private let propertyToEdit: Property?
 
+    // MARK: - Constants
+    private static let insuranceProviders = [
+        "AAMI",
+        "AJG Australia",
+        "Allianz",
+        "Aon",
+        "Apia",
+        "Australian Landlord Insurance",
+        "Australian Unity",
+        "Budget Direct",
+        "CGU Insurance",
+        "CHU",
+        "Coles Insurance",
+        "EBM RentCover",
+        "GIO",
+        "ING",
+        "NRMA Insurance",
+        "QBE",
+        "Qantas Insurance",
+        "Suncorp Insurance",
+        "Terri Scheer",
+        "Youi"
+    ]
+
     // MARK: - UI
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
@@ -55,6 +79,202 @@ final class AddPropertyViewController: UIViewController {
                                                  placeholder: "6.0",
                                                  keyboard: .decimalPad)
 
+    // Insurance
+    private let insuranceHeader = FormSectionHeader("Insurance Details (Optional)")
+    private let insuranceHintLabel: UILabel = {
+        let l = UILabel()
+        l.text = "Add property insurance information if applicable"
+        l.font = .systemFont(ofSize: 12)
+        l.textColor = .secondaryLabel
+        l.numberOfLines = 0
+        return l
+    }()
+    private let insuranceContainer = UIStackView()
+
+    // Same provider checkbox
+    private let sameProviderCheckbox: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setImage(UIImage(systemName: "square"), for: .normal)
+        b.setImage(UIImage(systemName: "checkmark.square.fill"), for: .selected)
+        b.contentHorizontalAlignment = .center
+        b.tintColor = .systemBlue
+        b.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        b.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        return b
+    }()
+    private let sameProviderLabel: UILabel = {
+        let l = UILabel()
+        l.text = "Both insurances have the same provider"
+        l.font = .systemFont(ofSize: 15)
+        l.textColor = .label
+        return l
+    }()
+
+    // Combined Insurance (when same provider is checked)
+    private let combinedInsuranceHeader = FormSectionHeader("Building & Landlord Insurance")
+    private lazy var combinedProviderButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Select Provider", for: .normal)
+        b.contentHorizontalAlignment = .left
+        b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var combinedSelectedProvider = "Select Provider"
+    private let combinedCustomProviderField = LabeledField(title: "Custom Provider",
+                                                           placeholder: "Enter provider name")
+    private lazy var combinedFrequencyButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Monthly", for: .normal)
+        b.contentHorizontalAlignment = .center
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var combinedSelectedFrequency = "Monthly"
+    private let combinedAmountField = LabeledField(title: "Repayment Amount ($)",
+                                                   placeholder: "e.g. 150",
+                                                   keyboard: .decimalPad)
+    private let combinedRenewalDatePicker: UIDatePicker = {
+        let dp = UIDatePicker()
+        dp.datePickerMode = .date
+        dp.preferredDatePickerStyle = .compact
+        dp.translatesAutoresizingMaskIntoConstraints = false
+        return dp
+    }()
+    private let combinedYearlyLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .systemBlue
+        l.numberOfLines = 0
+        return l
+    }()
+    private let combinedContainer = UIStackView()
+
+    // Building Insurance
+    private let buildingContainer = UIStackView()
+    private let buildingInsuranceHeader = FormSectionHeader("Building Insurance")
+    private lazy var buildingProviderButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Select Provider", for: .normal)
+        b.contentHorizontalAlignment = .left
+        b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var buildingSelectedProvider = "Select Provider"
+    private let buildingCustomProviderField = LabeledField(title: "Custom Provider",
+                                                           placeholder: "Enter provider name")
+    private lazy var buildingFrequencyButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Monthly", for: .normal)
+        b.contentHorizontalAlignment = .center
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var buildingSelectedFrequency = "Monthly"
+    private let buildingAmountField = LabeledField(title: "Repayment Amount ($)",
+                                                   placeholder: "e.g. 150",
+                                                   keyboard: .decimalPad)
+    private let buildingRenewalDatePicker: UIDatePicker = {
+        let dp = UIDatePicker()
+        dp.datePickerMode = .date
+        dp.preferredDatePickerStyle = .compact
+        dp.translatesAutoresizingMaskIntoConstraints = false
+        return dp
+    }()
+    private let buildingYearlyLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .systemBlue
+        l.numberOfLines = 0
+        return l
+    }()
+
+    // Landlord Insurance
+    private let landlordContainer = UIStackView()
+    private let landlordInsuranceHeader = FormSectionHeader("Landlord Insurance")
+    private lazy var landlordProviderButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Select Provider", for: .normal)
+        b.contentHorizontalAlignment = .left
+        b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var landlordSelectedProvider = "Select Provider"
+    private let landlordCustomProviderField = LabeledField(title: "Custom Provider",
+                                                           placeholder: "Enter provider name")
+    private lazy var landlordFrequencyButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Monthly", for: .normal)
+        b.contentHorizontalAlignment = .center
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private var landlordSelectedFrequency = "Monthly"
+    private let landlordAmountField = LabeledField(title: "Repayment Amount ($)",
+                                                   placeholder: "e.g. 150",
+                                                   keyboard: .decimalPad)
+    private let landlordRenewalDatePicker: UIDatePicker = {
+        let dp = UIDatePicker()
+        dp.datePickerMode = .date
+        dp.preferredDatePickerStyle = .compact
+        dp.translatesAutoresizingMaskIntoConstraints = false
+        return dp
+    }()
+    private let landlordYearlyLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .systemBlue
+        l.numberOfLines = 0
+        return l
+    }()
+
+    private let totalInsuranceLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 15, weight: .bold)
+        l.textColor = .systemGreen
+        l.numberOfLines = 0
+        return l
+    }()
+
     // MARK: - Init
     init(viewModel: PropertyViewModel, propertyToEdit: Property? = nil) {
         self.viewModel = viewModel
@@ -71,7 +291,15 @@ final class AddPropertyViewController: UIViewController {
         setupNav()
         buildForm()
         configureStateMenu()
+        configureCombinedProviderMenu()
+        configureBuildingProviderMenu()
+        configureLandlordProviderMenu()
+        configureCombinedFrequencyMenu()
+        configureBuildingFrequencyMenu()
+        configureLandlordFrequencyMenu()
+        configureSameProviderCheckbox()
         addDoneToolbarToKeyboards()
+        setupInsuranceCalculation()
         populateFieldsIfEditing()
     }
 
@@ -152,6 +380,202 @@ final class AddPropertyViewController: UIViewController {
         loanContainer.addArrangedSubview(loanAmountField)
         loanContainer.addArrangedSubview(interestRateField)
         contentStack.addArrangedSubview(loanContainer)
+
+        contentStack.addArrangedSubview(Divider())
+
+        // Insurance header
+        contentStack.addArrangedSubview(insuranceHeader)
+        contentStack.addArrangedSubview(insuranceHintLabel)
+
+        // Insurance container
+        insuranceContainer.axis = .vertical
+        insuranceContainer.spacing = 14
+
+        // Same provider checkbox row
+        let sameProviderRow = UIStackView(arrangedSubviews: [sameProviderCheckbox, sameProviderLabel])
+        sameProviderRow.axis = .horizontal
+        sameProviderRow.spacing = 12
+        sameProviderRow.alignment = .center
+        insuranceContainer.addArrangedSubview(sameProviderRow)
+
+        // Combined Insurance Section (shown when same provider is checked)
+        combinedContainer.axis = .vertical
+        combinedContainer.spacing = 14
+        combinedContainer.isHidden = true // Hidden by default
+
+        combinedContainer.addArrangedSubview(combinedInsuranceHeader)
+
+        // Provider dropdown with label
+        let combinedProviderStack = UIStackView()
+        combinedProviderStack.axis = .vertical
+        combinedProviderStack.spacing = 6
+        let combinedProviderLabel = UILabel()
+        combinedProviderLabel.text = "Provider"
+        combinedProviderLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        combinedProviderLabel.textColor = .secondaryLabel
+        combinedProviderStack.addArrangedSubview(combinedProviderLabel)
+        combinedProviderStack.addArrangedSubview(combinedProviderButton)
+        combinedContainer.addArrangedSubview(combinedProviderStack)
+
+        // Custom provider field (hidden by default)
+        combinedCustomProviderField.isHidden = true
+        combinedContainer.addArrangedSubview(combinedCustomProviderField)
+
+        // Combined Frequency and Amount row
+        let combinedFrequencyStack = UIStackView()
+        combinedFrequencyStack.axis = .vertical
+        combinedFrequencyStack.spacing = 6
+        let combinedFrequencyLabel = UILabel()
+        combinedFrequencyLabel.text = "Frequency"
+        combinedFrequencyLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        combinedFrequencyLabel.textColor = .secondaryLabel
+        combinedFrequencyStack.addArrangedSubview(combinedFrequencyLabel)
+        combinedFrequencyStack.addArrangedSubview(combinedFrequencyButton)
+
+        let combinedFrequencyAmountRow = UIStackView(arrangedSubviews: [combinedFrequencyStack, combinedAmountField])
+        combinedFrequencyAmountRow.axis = .horizontal
+        combinedFrequencyAmountRow.spacing = 12
+        combinedFrequencyAmountRow.alignment = .fill
+        combinedFrequencyAmountRow.distribution = .fillEqually
+        combinedContainer.addArrangedSubview(combinedFrequencyAmountRow)
+
+        // Combined Renewal date row
+        let combinedRenewalLabel = UILabel()
+        combinedRenewalLabel.text = "Renewal Date"
+        combinedRenewalLabel.font = .systemFont(ofSize: 15)
+        combinedRenewalLabel.textColor = .label
+
+        let combinedRenewalRow = UIStackView(arrangedSubviews: [combinedRenewalLabel, combinedRenewalDatePicker])
+        combinedRenewalRow.axis = .horizontal
+        combinedRenewalRow.spacing = 12
+        combinedRenewalRow.alignment = .center
+        combinedContainer.addArrangedSubview(combinedRenewalRow)
+
+        // Combined yearly repayment display
+        combinedContainer.addArrangedSubview(combinedYearlyLabel)
+
+        insuranceContainer.addArrangedSubview(combinedContainer)
+
+        // Building Insurance Section (shown when same provider is not checked)
+        buildingContainer.axis = .vertical
+        buildingContainer.spacing = 14
+        buildingContainer.isHidden = false // Visible by default
+
+        buildingContainer.addArrangedSubview(buildingInsuranceHeader)
+
+        // Provider dropdown with label
+        let buildingProviderStack = UIStackView()
+        buildingProviderStack.axis = .vertical
+        buildingProviderStack.spacing = 6
+        let buildingProviderLabel = UILabel()
+        buildingProviderLabel.text = "Provider"
+        buildingProviderLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        buildingProviderLabel.textColor = .secondaryLabel
+        buildingProviderStack.addArrangedSubview(buildingProviderLabel)
+        buildingProviderStack.addArrangedSubview(buildingProviderButton)
+        buildingContainer.addArrangedSubview(buildingProviderStack)
+
+        // Custom provider field (hidden by default)
+        buildingCustomProviderField.isHidden = true
+        buildingContainer.addArrangedSubview(buildingCustomProviderField)
+
+        // Building Frequency and Amount row
+        let buildingFrequencyStack = UIStackView()
+        buildingFrequencyStack.axis = .vertical
+        buildingFrequencyStack.spacing = 6
+        let buildingFrequencyLabel = UILabel()
+        buildingFrequencyLabel.text = "Frequency"
+        buildingFrequencyLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        buildingFrequencyLabel.textColor = .secondaryLabel
+        buildingFrequencyStack.addArrangedSubview(buildingFrequencyLabel)
+        buildingFrequencyStack.addArrangedSubview(buildingFrequencyButton)
+
+        let buildingFrequencyAmountRow = UIStackView(arrangedSubviews: [buildingFrequencyStack, buildingAmountField])
+        buildingFrequencyAmountRow.axis = .horizontal
+        buildingFrequencyAmountRow.spacing = 12
+        buildingFrequencyAmountRow.alignment = .fill
+        buildingFrequencyAmountRow.distribution = .fillEqually
+        buildingContainer.addArrangedSubview(buildingFrequencyAmountRow)
+
+        // Building Renewal date row
+        let buildingRenewalLabel = UILabel()
+        buildingRenewalLabel.text = "Renewal Date"
+        buildingRenewalLabel.font = .systemFont(ofSize: 15)
+        buildingRenewalLabel.textColor = .label
+
+        let buildingRenewalRow = UIStackView(arrangedSubviews: [buildingRenewalLabel, buildingRenewalDatePicker])
+        buildingRenewalRow.axis = .horizontal
+        buildingRenewalRow.spacing = 12
+        buildingRenewalRow.alignment = .center
+        buildingContainer.addArrangedSubview(buildingRenewalRow)
+
+        // Building yearly repayment display
+        buildingContainer.addArrangedSubview(buildingYearlyLabel)
+
+        insuranceContainer.addArrangedSubview(buildingContainer)
+
+        // Landlord Insurance Section (shown when same provider is not checked)
+        landlordContainer.axis = .vertical
+        landlordContainer.spacing = 14
+        landlordContainer.isHidden = false // Visible by default
+
+        landlordContainer.addArrangedSubview(landlordInsuranceHeader)
+
+        // Provider dropdown with label
+        let landlordProviderStack = UIStackView()
+        landlordProviderStack.axis = .vertical
+        landlordProviderStack.spacing = 6
+        let landlordProviderLabel = UILabel()
+        landlordProviderLabel.text = "Provider"
+        landlordProviderLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        landlordProviderLabel.textColor = .secondaryLabel
+        landlordProviderStack.addArrangedSubview(landlordProviderLabel)
+        landlordProviderStack.addArrangedSubview(landlordProviderButton)
+        landlordContainer.addArrangedSubview(landlordProviderStack)
+
+        // Custom provider field (hidden by default)
+        landlordCustomProviderField.isHidden = true
+        landlordContainer.addArrangedSubview(landlordCustomProviderField)
+
+        // Landlord Frequency and Amount row
+        let landlordFrequencyStack = UIStackView()
+        landlordFrequencyStack.axis = .vertical
+        landlordFrequencyStack.spacing = 6
+        let landlordFrequencyLabel = UILabel()
+        landlordFrequencyLabel.text = "Frequency"
+        landlordFrequencyLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        landlordFrequencyLabel.textColor = .secondaryLabel
+        landlordFrequencyStack.addArrangedSubview(landlordFrequencyLabel)
+        landlordFrequencyStack.addArrangedSubview(landlordFrequencyButton)
+
+        let landlordFrequencyAmountRow = UIStackView(arrangedSubviews: [landlordFrequencyStack, landlordAmountField])
+        landlordFrequencyAmountRow.axis = .horizontal
+        landlordFrequencyAmountRow.spacing = 12
+        landlordFrequencyAmountRow.alignment = .fill
+        landlordFrequencyAmountRow.distribution = .fillEqually
+        landlordContainer.addArrangedSubview(landlordFrequencyAmountRow)
+
+        // Landlord Renewal date row
+        let landlordRenewalLabel = UILabel()
+        landlordRenewalLabel.text = "Renewal Date"
+        landlordRenewalLabel.font = .systemFont(ofSize: 15)
+        landlordRenewalLabel.textColor = .label
+
+        let landlordRenewalRow = UIStackView(arrangedSubviews: [landlordRenewalLabel, landlordRenewalDatePicker])
+        landlordRenewalRow.axis = .horizontal
+        landlordRenewalRow.spacing = 12
+        landlordRenewalRow.alignment = .center
+        landlordContainer.addArrangedSubview(landlordRenewalRow)
+
+        // Landlord yearly repayment display
+        landlordContainer.addArrangedSubview(landlordYearlyLabel)
+
+        insuranceContainer.addArrangedSubview(landlordContainer)
+
+        // Total insurance repayment
+        insuranceContainer.addArrangedSubview(totalInsuranceLabel)
+
+        contentStack.addArrangedSubview(insuranceContainer)
     }
 
     private func configureStateMenu() {
@@ -166,12 +590,315 @@ final class AddPropertyViewController: UIViewController {
         stateButton.showsMenuAsPrimaryAction = true
     }
 
+    private func configureCombinedFrequencyMenu() {
+        let frequencies = ["Monthly", "Fortnightly", "Yearly"]
+        var actions: [UIAction] = []
+        for freq in frequencies {
+            actions.append(UIAction(title: freq) { [weak self] _ in
+                self?.combinedFrequencyButton.setTitle(freq, for: .normal)
+                self?.combinedSelectedFrequency = freq
+                self?.updateCombinedYearlyDisplay()
+            })
+        }
+        combinedFrequencyButton.menu = UIMenu(children: actions)
+        combinedFrequencyButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureBuildingFrequencyMenu() {
+        let frequencies = ["Monthly", "Fortnightly", "Yearly"]
+        var actions: [UIAction] = []
+        for freq in frequencies {
+            actions.append(UIAction(title: freq) { [weak self] _ in
+                self?.buildingFrequencyButton.setTitle(freq, for: .normal)
+                self?.buildingSelectedFrequency = freq
+                self?.updateBuildingYearlyDisplay()
+                self?.updateTotalInsuranceDisplay()
+            })
+        }
+        buildingFrequencyButton.menu = UIMenu(children: actions)
+        buildingFrequencyButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureLandlordFrequencyMenu() {
+        let frequencies = ["Monthly", "Fortnightly", "Yearly"]
+        var actions: [UIAction] = []
+        for freq in frequencies {
+            actions.append(UIAction(title: freq) { [weak self] _ in
+                self?.landlordFrequencyButton.setTitle(freq, for: .normal)
+                self?.landlordSelectedFrequency = freq
+                self?.updateLandlordYearlyDisplay()
+                self?.updateTotalInsuranceDisplay()
+            })
+        }
+        landlordFrequencyButton.menu = UIMenu(children: actions)
+        landlordFrequencyButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureCombinedProviderMenu() {
+        var actions: [UIAction] = []
+
+        // Add all providers from the list
+        for provider in Self.insuranceProviders {
+            actions.append(UIAction(title: provider) { [weak self] _ in
+                self?.combinedProviderButton.setTitle(provider, for: .normal)
+                self?.combinedSelectedProvider = provider
+                self?.combinedCustomProviderField.isHidden = true
+            })
+        }
+
+        // Add "Not in the list" option
+        actions.append(UIAction(title: "Not in the list") { [weak self] _ in
+            self?.combinedProviderButton.setTitle("Not in the list", for: .normal)
+            self?.combinedSelectedProvider = "Not in the list"
+            self?.combinedCustomProviderField.isHidden = false
+        })
+
+        combinedProviderButton.menu = UIMenu(children: actions)
+        combinedProviderButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureBuildingProviderMenu() {
+        var actions: [UIAction] = []
+
+        // Add all providers from the list
+        for provider in Self.insuranceProviders {
+            actions.append(UIAction(title: provider) { [weak self] _ in
+                self?.buildingProviderButton.setTitle(provider, for: .normal)
+                self?.buildingSelectedProvider = provider
+                self?.buildingCustomProviderField.isHidden = true
+            })
+        }
+
+        // Add "Not in the list" option
+        actions.append(UIAction(title: "Not in the list") { [weak self] _ in
+            self?.buildingProviderButton.setTitle("Not in the list", for: .normal)
+            self?.buildingSelectedProvider = "Not in the list"
+            self?.buildingCustomProviderField.isHidden = false
+        })
+
+        buildingProviderButton.menu = UIMenu(children: actions)
+        buildingProviderButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureLandlordProviderMenu() {
+        var actions: [UIAction] = []
+
+        // Add all providers from the list
+        for provider in Self.insuranceProviders {
+            actions.append(UIAction(title: provider) { [weak self] _ in
+                self?.landlordProviderButton.setTitle(provider, for: .normal)
+                self?.landlordSelectedProvider = provider
+                self?.landlordCustomProviderField.isHidden = true
+            })
+        }
+
+        // Add "Not in the list" option
+        actions.append(UIAction(title: "Not in the list") { [weak self] _ in
+            self?.landlordProviderButton.setTitle("Not in the list", for: .normal)
+            self?.landlordSelectedProvider = "Not in the list"
+            self?.landlordCustomProviderField.isHidden = false
+        })
+
+        landlordProviderButton.menu = UIMenu(children: actions)
+        landlordProviderButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureSameProviderCheckbox() {
+        sameProviderCheckbox.addTarget(self, action: #selector(sameProviderToggled), for: .touchUpInside)
+    }
+
+    @objc private func sameProviderToggled() {
+        sameProviderCheckbox.isSelected.toggle()
+
+        if sameProviderCheckbox.isSelected {
+            // Show combined section, hide separate sections
+            combinedContainer.isHidden = false
+            buildingContainer.isHidden = true
+            landlordContainer.isHidden = true
+
+            // Copy data from building to combined if available
+            combinedSelectedProvider = buildingSelectedProvider
+            combinedProviderButton.setTitle(buildingSelectedProvider, for: .normal)
+            if buildingSelectedProvider == "Not in the list" {
+                combinedCustomProviderField.isHidden = false
+                if let customProvider = buildingCustomProviderField.textField.text {
+                    combinedCustomProviderField.textField.text = customProvider
+                }
+            } else {
+                combinedCustomProviderField.isHidden = true
+            }
+
+            if let amount = buildingAmountField.textField.text, !amount.isEmpty {
+                combinedAmountField.textField.text = amount
+            }
+            combinedSelectedFrequency = buildingSelectedFrequency
+            combinedFrequencyButton.setTitle(buildingSelectedFrequency, for: .normal)
+            combinedRenewalDatePicker.date = buildingRenewalDatePicker.date
+            updateCombinedYearlyDisplay()
+        } else {
+            // Show separate sections, hide combined section
+            combinedContainer.isHidden = true
+            buildingContainer.isHidden = false
+            landlordContainer.isHidden = false
+
+            // Copy data from combined back to building and landlord
+            buildingSelectedProvider = combinedSelectedProvider
+            landlordSelectedProvider = combinedSelectedProvider
+            buildingProviderButton.setTitle(combinedSelectedProvider, for: .normal)
+            landlordProviderButton.setTitle(combinedSelectedProvider, for: .normal)
+
+            if combinedSelectedProvider == "Not in the list" {
+                buildingCustomProviderField.isHidden = false
+                landlordCustomProviderField.isHidden = false
+                if let customProvider = combinedCustomProviderField.textField.text {
+                    buildingCustomProviderField.textField.text = customProvider
+                    landlordCustomProviderField.textField.text = customProvider
+                }
+            } else {
+                buildingCustomProviderField.isHidden = true
+                landlordCustomProviderField.isHidden = true
+            }
+
+            if let amount = combinedAmountField.textField.text, !amount.isEmpty {
+                buildingAmountField.textField.text = amount
+                landlordAmountField.textField.text = amount
+            }
+            buildingSelectedFrequency = combinedSelectedFrequency
+            landlordSelectedFrequency = combinedSelectedFrequency
+            buildingFrequencyButton.setTitle(combinedSelectedFrequency, for: .normal)
+            landlordFrequencyButton.setTitle(combinedSelectedFrequency, for: .normal)
+            buildingRenewalDatePicker.date = combinedRenewalDatePicker.date
+            landlordRenewalDatePicker.date = combinedRenewalDatePicker.date
+
+            updateBuildingYearlyDisplay()
+            updateLandlordYearlyDisplay()
+            updateTotalInsuranceDisplay()
+        }
+    }
+
+    private func setupInsuranceCalculation() {
+        combinedAmountField.textField.addTarget(self, action: #selector(combinedAmountDidChange(_:)), for: .editingChanged)
+        buildingAmountField.textField.addTarget(self, action: #selector(buildingAmountDidChange(_:)), for: .editingChanged)
+        landlordAmountField.textField.addTarget(self, action: #selector(landlordAmountDidChange(_:)), for: .editingChanged)
+    }
+
+    @objc private func combinedAmountDidChange(_ textField: UITextField) {
+        updateCombinedYearlyDisplay()
+    }
+
+    @objc private func buildingAmountDidChange(_ textField: UITextField) {
+        updateBuildingYearlyDisplay()
+        updateTotalInsuranceDisplay()
+    }
+
+    @objc private func landlordAmountDidChange(_ textField: UITextField) {
+        updateLandlordYearlyDisplay()
+        updateTotalInsuranceDisplay()
+    }
+
+    private func updateCombinedYearlyDisplay() {
+        guard let amountText = combinedAmountField.textField.text,
+              !amountText.isEmpty,
+              let amount = Double(amountText.replacingOccurrences(of: ",", with: "")) else {
+            combinedYearlyLabel.text = ""
+            return
+        }
+
+        let yearlyAmount: Double
+        if combinedSelectedFrequency == "Yearly" {
+            yearlyAmount = amount
+            combinedYearlyLabel.text = "Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else if combinedSelectedFrequency == "Fortnightly" {
+            yearlyAmount = amount * 26
+            combinedYearlyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else {
+            yearlyAmount = amount * 12
+            combinedYearlyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        }
+    }
+
+    private func updateBuildingYearlyDisplay() {
+        guard let amountText = buildingAmountField.textField.text,
+              !amountText.isEmpty,
+              let amount = Double(amountText.replacingOccurrences(of: ",", with: "")) else {
+            buildingYearlyLabel.text = ""
+            return
+        }
+
+        let yearlyAmount: Double
+        if buildingSelectedFrequency == "Yearly" {
+            yearlyAmount = amount
+            buildingYearlyLabel.text = "Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else if buildingSelectedFrequency == "Fortnightly" {
+            yearlyAmount = amount * 26
+            buildingYearlyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else {
+            yearlyAmount = amount * 12
+            buildingYearlyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        }
+    }
+
+    private func updateLandlordYearlyDisplay() {
+        guard let amountText = landlordAmountField.textField.text,
+              !amountText.isEmpty,
+              let amount = Double(amountText.replacingOccurrences(of: ",", with: "")) else {
+            landlordYearlyLabel.text = ""
+            return
+        }
+
+        let yearlyAmount: Double
+        if landlordSelectedFrequency == "Yearly" {
+            yearlyAmount = amount
+            landlordYearlyLabel.text = "Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else if landlordSelectedFrequency == "Fortnightly" {
+            yearlyAmount = amount * 26
+            landlordYearlyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        } else {
+            yearlyAmount = amount * 12
+            landlordYearlyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Yearly: $\(Int(yearlyAmount).formattedWithSeparator())"
+        }
+    }
+
+    private func updateTotalInsuranceDisplay() {
+        let buildingAmount = Double(buildingAmountField.textField.text?.replacingOccurrences(of: ",", with: "") ?? "") ?? 0
+        let landlordAmount = Double(landlordAmountField.textField.text?.replacingOccurrences(of: ",", with: "") ?? "") ?? 0
+
+        let buildingYearly: Double
+        if buildingSelectedFrequency == "Yearly" {
+            buildingYearly = buildingAmount
+        } else if buildingSelectedFrequency == "Fortnightly" {
+            buildingYearly = buildingAmount * 26
+        } else {
+            buildingYearly = buildingAmount * 12
+        }
+
+        let landlordYearly: Double
+        if landlordSelectedFrequency == "Yearly" {
+            landlordYearly = landlordAmount
+        } else if landlordSelectedFrequency == "Fortnightly" {
+            landlordYearly = landlordAmount * 26
+        } else {
+            landlordYearly = landlordAmount * 12
+        }
+
+        let total = buildingYearly + landlordYearly
+
+        if total > 0 {
+            totalInsuranceLabel.text = "Total Yearly Insurance: $\(Int(total).formattedWithSeparator())"
+        } else {
+            totalInsuranceLabel.text = ""
+        }
+    }
+
     // Add "Done" toolbar for number pads
     private func addDoneToolbarToKeyboards() {
         [purchaseField.textField,
          currentValueField.textField,
          loanAmountField.textField,
-         interestRateField.textField].forEach { tf in
+         interestRateField.textField,
+         combinedAmountField.textField,
+         buildingAmountField.textField,
+         landlordAmountField.textField].forEach { tf in
             let tb = UIToolbar()
             tb.sizeToFit()
             let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -215,6 +942,88 @@ final class AddPropertyViewController: UIViewController {
         if let loan = property.loan {
             loanAmountField.textField.text = Int(loan.amount).formattedWithSeparator()
             interestRateField.textField.text = "\(loan.interestRate)"
+        }
+
+        if let insurance = property.insurance {
+            // Check if both insurances have the same data (sameProvider flag)
+            if insurance.sameProvider {
+                // Show combined section
+                sameProviderCheckbox.isSelected = true
+                combinedContainer.isHidden = false
+                buildingContainer.isHidden = true
+                landlordContainer.isHidden = true
+
+                // Set provider button and custom field
+                let provider = insurance.buildingProvider
+                if Self.insuranceProviders.contains(provider) {
+                    combinedSelectedProvider = provider
+                    combinedProviderButton.setTitle(provider, for: .normal)
+                    combinedCustomProviderField.isHidden = true
+                } else {
+                    combinedSelectedProvider = "Not in the list"
+                    combinedProviderButton.setTitle("Not in the list", for: .normal)
+                    combinedCustomProviderField.textField.text = provider
+                    combinedCustomProviderField.isHidden = false
+                }
+
+                combinedSelectedFrequency = insurance.buildingFrequency
+                combinedFrequencyButton.setTitle(insurance.buildingFrequency, for: .normal)
+                combinedAmountField.textField.text = "\(insurance.buildingAmount)"
+                if let renewalDate = insurance.buildingRenewalDate {
+                    combinedRenewalDatePicker.date = renewalDate
+                }
+                updateCombinedYearlyDisplay()
+            } else {
+                // Show separate sections
+                sameProviderCheckbox.isSelected = false
+                combinedContainer.isHidden = true
+                buildingContainer.isHidden = false
+                landlordContainer.isHidden = false
+
+                // Building insurance - set provider button and custom field
+                let buildingProvider = insurance.buildingProvider
+                if Self.insuranceProviders.contains(buildingProvider) {
+                    buildingSelectedProvider = buildingProvider
+                    buildingProviderButton.setTitle(buildingProvider, for: .normal)
+                    buildingCustomProviderField.isHidden = true
+                } else {
+                    buildingSelectedProvider = "Not in the list"
+                    buildingProviderButton.setTitle("Not in the list", for: .normal)
+                    buildingCustomProviderField.textField.text = buildingProvider
+                    buildingCustomProviderField.isHidden = false
+                }
+
+                buildingSelectedFrequency = insurance.buildingFrequency
+                buildingFrequencyButton.setTitle(insurance.buildingFrequency, for: .normal)
+                buildingAmountField.textField.text = "\(insurance.buildingAmount)"
+                if let renewalDate = insurance.buildingRenewalDate {
+                    buildingRenewalDatePicker.date = renewalDate
+                }
+
+                // Landlord insurance - set provider button and custom field
+                let landlordProvider = insurance.landlordProvider
+                if Self.insuranceProviders.contains(landlordProvider) {
+                    landlordSelectedProvider = landlordProvider
+                    landlordProviderButton.setTitle(landlordProvider, for: .normal)
+                    landlordCustomProviderField.isHidden = true
+                } else {
+                    landlordSelectedProvider = "Not in the list"
+                    landlordProviderButton.setTitle("Not in the list", for: .normal)
+                    landlordCustomProviderField.textField.text = landlordProvider
+                    landlordCustomProviderField.isHidden = false
+                }
+
+                landlordSelectedFrequency = insurance.landlordFrequency
+                landlordFrequencyButton.setTitle(insurance.landlordFrequency, for: .normal)
+                landlordAmountField.textField.text = "\(insurance.landlordAmount)"
+                if let renewalDate = insurance.landlordRenewalDate {
+                    landlordRenewalDatePicker.date = renewalDate
+                }
+
+                updateBuildingYearlyDisplay()
+                updateLandlordYearlyDisplay()
+                updateTotalInsuranceDisplay()
+            }
         }
     }
 
@@ -265,6 +1074,125 @@ final class AddPropertyViewController: UIViewController {
             }
         }
 
+        // Extract insurance data if provided
+        var insuranceData: (
+            buildingProvider: String, buildingFrequency: String, buildingAmount: Double, buildingRenewalDate: Date?,
+            landlordProvider: String, landlordFrequency: String, landlordAmount: Double, landlordRenewalDate: Date?,
+            sameProvider: Bool
+        )? = nil
+
+        if sameProviderCheckbox.isSelected {
+            // Using combined section
+            let hasProviderSelected = combinedSelectedProvider != "Select Provider"
+            let hasAmount = !(combinedAmountField.textField.text ?? "").isEmpty
+
+            if hasProviderSelected || hasAmount {
+                // Get provider from button or custom field
+                var provider: String
+                if combinedSelectedProvider == "Not in the list" {
+                    guard let customProvider = combinedCustomProviderField.textField.text, !customProvider.isEmpty else {
+                        showAlert("Please enter a custom insurance provider."); return
+                    }
+                    provider = customProvider
+                } else if combinedSelectedProvider == "Select Provider" {
+                    showAlert("Please select an insurance provider."); return
+                } else {
+                    provider = combinedSelectedProvider
+                }
+
+                guard let amountText = combinedAmountField.textField.text,
+                      !amountText.isEmpty,
+                      let amt = Double(amountText.replacingOccurrences(of: ",", with: "")), amt > 0 else {
+                    showAlert("Please enter an insurance repayment amount."); return
+                }
+
+                // Use same data for both building and landlord
+                insuranceData = (
+                    buildingProvider: provider,
+                    buildingFrequency: combinedSelectedFrequency,
+                    buildingAmount: amt,
+                    buildingRenewalDate: combinedRenewalDatePicker.date,
+                    landlordProvider: provider,
+                    landlordFrequency: combinedSelectedFrequency,
+                    landlordAmount: amt,
+                    landlordRenewalDate: combinedRenewalDatePicker.date,
+                    sameProvider: true
+                )
+            }
+        } else {
+            // Using separate sections
+            let hasBuildingProviderSelected = buildingSelectedProvider != "Select Provider"
+            let hasBuildingAmount = !(buildingAmountField.textField.text ?? "").isEmpty
+            let hasLandlordProviderSelected = landlordSelectedProvider != "Select Provider"
+            let hasLandlordAmount = !(landlordAmountField.textField.text ?? "").isEmpty
+
+            let hasBuildingInsurance = hasBuildingProviderSelected || hasBuildingAmount
+            let hasLandlordInsurance = hasLandlordProviderSelected || hasLandlordAmount
+
+            if hasBuildingInsurance || hasLandlordInsurance {
+                var buildingProvider = ""
+                var buildingAmount: Double = 0
+                var landlordProvider = ""
+                var landlordAmount: Double = 0
+
+                // Validate building insurance
+                if hasBuildingInsurance {
+                    // Get provider from button or custom field
+                    if buildingSelectedProvider == "Not in the list" {
+                        guard let customProvider = buildingCustomProviderField.textField.text, !customProvider.isEmpty else {
+                            showAlert("Please enter a custom building insurance provider."); return
+                        }
+                        buildingProvider = customProvider
+                    } else if buildingSelectedProvider == "Select Provider" {
+                        showAlert("Please select a building insurance provider."); return
+                    } else {
+                        buildingProvider = buildingSelectedProvider
+                    }
+
+                    guard let amountText = buildingAmountField.textField.text,
+                          !amountText.isEmpty,
+                          let amt = Double(amountText.replacingOccurrences(of: ",", with: "")), amt > 0 else {
+                        showAlert("Please enter a building insurance repayment amount."); return
+                    }
+                    buildingAmount = amt
+                }
+
+                // Validate landlord insurance
+                if hasLandlordInsurance {
+                    // Get provider from button or custom field
+                    if landlordSelectedProvider == "Not in the list" {
+                        guard let customProvider = landlordCustomProviderField.textField.text, !customProvider.isEmpty else {
+                            showAlert("Please enter a custom landlord insurance provider."); return
+                        }
+                        landlordProvider = customProvider
+                    } else if landlordSelectedProvider == "Select Provider" {
+                        showAlert("Please select a landlord insurance provider."); return
+                    } else {
+                        landlordProvider = landlordSelectedProvider
+                    }
+
+                    guard let amountText = landlordAmountField.textField.text,
+                          !amountText.isEmpty,
+                          let amt = Double(amountText.replacingOccurrences(of: ",", with: "")), amt > 0 else {
+                        showAlert("Please enter a landlord insurance repayment amount."); return
+                    }
+                    landlordAmount = amt
+                }
+
+                insuranceData = (
+                    buildingProvider: buildingProvider,
+                    buildingFrequency: buildingSelectedFrequency,
+                    buildingAmount: buildingAmount,
+                    buildingRenewalDate: buildingRenewalDatePicker.date,
+                    landlordProvider: landlordProvider,
+                    landlordFrequency: landlordSelectedFrequency,
+                    landlordAmount: landlordAmount,
+                    landlordRenewalDate: landlordRenewalDatePicker.date,
+                    sameProvider: false
+                )
+            }
+        }
+
         // Handle edit vs add
         if let existingProperty = propertyToEdit {
             // Update existing property inside write transaction
@@ -273,7 +1201,8 @@ final class AddPropertyViewController: UIViewController {
                                     state: state.rawValue,
                                     purchasePrice: purchaseValue,
                                     currentValue: currentValue,
-                                    loanData: loanData)
+                                    loanData: loanData,
+                                    insuranceData: insuranceData)
         } else {
             // Create new property
             let property = Property()
@@ -289,6 +1218,20 @@ final class AddPropertyViewController: UIViewController {
                 propertyLoan.interestRate = loan.interestRate
                 propertyLoan.loanType = "variable"
                 property.loan = propertyLoan
+            }
+
+            if let insurance = insuranceData {
+                let propertyInsurance = PropertyInsurance()
+                propertyInsurance.buildingProvider = insurance.buildingProvider
+                propertyInsurance.buildingFrequency = insurance.buildingFrequency
+                propertyInsurance.buildingAmount = insurance.buildingAmount
+                propertyInsurance.buildingRenewalDate = insurance.buildingRenewalDate
+                propertyInsurance.landlordProvider = insurance.landlordProvider
+                propertyInsurance.landlordFrequency = insurance.landlordFrequency
+                propertyInsurance.landlordAmount = insurance.landlordAmount
+                propertyInsurance.landlordRenewalDate = insurance.landlordRenewalDate
+                propertyInsurance.sameProvider = insurance.sameProvider
+                property.insurance = propertyInsurance
             }
 
             viewModel.addProperty(property)

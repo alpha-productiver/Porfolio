@@ -9,12 +9,22 @@ class RealmService {
     private init() {
         do {
             let config = Realm.Configuration(
-                schemaVersion: 3,
+                schemaVersion: 5,
                 migrationBlock: { migration, oldSchemaVersion in
                     // Migration from v1 to v2: Removed otherCosts, stampDuty, legalFees
                     if oldSchemaVersion < 3 {
                         // Realm automatically handles removed properties
                         // No manual migration needed for removed fields
+                    }
+                    // Migration from v3 to v4: Added insurance field
+                    if oldSchemaVersion < 4 {
+                        // Realm automatically handles new optional properties
+                        // No manual migration needed for new optional fields
+                    }
+                    // Migration from v4 to v5: Restructured insurance to separate building and landlord
+                    if oldSchemaVersion < 5 {
+                        // Realm automatically handles property changes
+                        // No manual migration needed
                     }
                 },
                 deleteRealmIfMigrationNeeded: false

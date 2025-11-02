@@ -15,6 +15,7 @@ class Property: Object {
     @Persisted var rentalIncome: Double = 0.0
     @Persisted var expenses: Double = 0.0
     @Persisted var loan: PropertyLoan?
+    @Persisted var insurance: PropertyInsurance?
     @Persisted var createdAt = Date()
     @Persisted var updatedAt = Date()
 
@@ -39,6 +40,67 @@ class PropertyLoan: Object {
 
     var annualInterest: Double {
         return amount * (interestRate / 100)
+    }
+}
+
+class PropertyInsurance: Object {
+    // Building Insurance
+    @Persisted var buildingProvider: String = ""
+    @Persisted var buildingFrequency: String = "Monthly" // "Monthly" or "Yearly"
+    @Persisted var buildingAmount: Double = 0.0
+    @Persisted var buildingRenewalDate: Date?
+
+    // Landlord Insurance
+    @Persisted var landlordProvider: String = ""
+    @Persisted var landlordFrequency: String = "Monthly" // "Monthly" or "Yearly"
+    @Persisted var landlordAmount: Double = 0.0
+    @Persisted var landlordRenewalDate: Date?
+
+    // Same provider flag
+    @Persisted var sameProvider: Bool = false
+
+    var buildingYearlyRepayment: Double {
+        if buildingFrequency == "Yearly" {
+            return buildingAmount
+        } else if buildingFrequency == "Fortnightly" {
+            return buildingAmount * 26
+        } else {
+            return buildingAmount * 12
+        }
+    }
+
+    var buildingMonthlyRepayment: Double {
+        if buildingFrequency == "Monthly" {
+            return buildingAmount
+        } else if buildingFrequency == "Fortnightly" {
+            return (buildingAmount * 26) / 12
+        } else {
+            return buildingAmount / 12
+        }
+    }
+
+    var landlordYearlyRepayment: Double {
+        if landlordFrequency == "Yearly" {
+            return landlordAmount
+        } else if landlordFrequency == "Fortnightly" {
+            return landlordAmount * 26
+        } else {
+            return landlordAmount * 12
+        }
+    }
+
+    var landlordMonthlyRepayment: Double {
+        if landlordFrequency == "Monthly" {
+            return landlordAmount
+        } else if landlordFrequency == "Fortnightly" {
+            return (landlordAmount * 26) / 12
+        } else {
+            return landlordAmount / 12
+        }
+    }
+
+    var totalYearlyRepayment: Double {
+        return buildingYearlyRepayment + landlordYearlyRepayment
     }
 }
 
