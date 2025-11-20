@@ -35,13 +35,15 @@ class MainCoordinator: Coordinator {
         let dashboardNav = createDashboardNavigationController()
         let propertiesNav = createPropertiesNavigationController()
         let assetsNav = createAssetsNavigationController()
+        let cashFlowNav = createCashFlowNavigationController()
         let cashNav = createCashNavigationController()
         let liabilitiesNav = createLiabilitiesNavigationController()
-        
+
         tabBarController.viewControllers = [
             dashboardNav,
             propertiesNav,
             assetsNav,
+            cashFlowNav,
             cashNav,
             liabilitiesNav
         ]
@@ -101,7 +103,24 @@ class MainCoordinator: Coordinator {
 
         return navController
     }
-    
+
+    private func createCashFlowNavigationController() -> UINavigationController {
+        let cashFlowVC = CashFlowViewController()
+        let viewModel = CashFlowViewModel(realmService: realmService)
+        cashFlowVC.viewModel = viewModel
+        cashFlowVC.coordinator = self
+
+        let navController = UINavigationController(rootViewController: cashFlowVC)
+        navController.tabBarItem = UITabBarItem(
+            title: "Cash Flow",
+            image: UIImage(systemName: "waveform.path.ecg"),
+            selectedImage: UIImage(systemName: "waveform.path.ecg")
+        )
+        navController.navigationBar.prefersLargeTitles = true
+
+        return navController
+    }
+
     private func createCashNavigationController() -> UINavigationController {
         let cashVC = CashAccountsViewController()
         let viewModel = CashAccountViewModel()
