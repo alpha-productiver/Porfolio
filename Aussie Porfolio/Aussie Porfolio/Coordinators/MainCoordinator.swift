@@ -8,6 +8,13 @@ class MainCoordinator: Coordinator {
     private let realmService: RealmService
     private weak var tabBarController: UITabBarController?
 
+    private enum TabIndex {
+        static let dashboard = 0
+        static let cashFlow = 1
+        static let properties = 2
+        static let more = 3
+    }
+
     init(window: UIWindow, navigationController: UINavigationController = UINavigationController()) {
         self.window = window
         self.navigationController = navigationController
@@ -33,21 +40,18 @@ class MainCoordinator: Coordinator {
         let tabBarController = UITabBarController()
         
         let dashboardNav = createDashboardNavigationController()
-        let propertiesNav = createPropertiesNavigationController()
-        let assetsNav = createAssetsNavigationController()
         let cashFlowNav = createCashFlowNavigationController()
-        let cashNav = createCashNavigationController()
-        let liabilitiesNav = createLiabilitiesNavigationController()
+        let propertiesNav = createPropertiesNavigationController()
+        let moreNav = createMoreNavigationController()
 
         tabBarController.viewControllers = [
             dashboardNav,
-            propertiesNav,
-            assetsNav,
             cashFlowNav,
-            cashNav,
-            liabilitiesNav
+            propertiesNav,
+            moreNav
         ]
-        
+        tabBarController.customizableViewControllers = tabBarController.viewControllers
+
         tabBarController.tabBar.tintColor = .systemGreen
         
         return tabBarController
@@ -87,23 +91,6 @@ class MainCoordinator: Coordinator {
         return navController
     }
     
-    private func createAssetsNavigationController() -> UINavigationController {
-        let assetsVC = AssetsViewController()
-        let viewModel = AssetViewModel()
-        assetsVC.viewModel = viewModel
-        assetsVC.coordinator = self
-
-        let navController = UINavigationController(rootViewController: assetsVC)
-        navController.tabBarItem = UITabBarItem(
-            title: "Assets",
-            image: UIImage(systemName: "dollarsign.circle"),
-            selectedImage: UIImage(systemName: "dollarsign.circle.fill")
-        )
-        navController.navigationBar.prefersLargeTitles = true
-
-        return navController
-    }
-
     private func createCashFlowNavigationController() -> UINavigationController {
         let cashFlowVC = CashFlowViewController()
         let viewModel = CashFlowViewModel(realmService: realmService)
@@ -121,17 +108,15 @@ class MainCoordinator: Coordinator {
         return navController
     }
 
-    private func createCashNavigationController() -> UINavigationController {
-        let cashVC = CashAccountsViewController()
-        let viewModel = CashAccountViewModel()
-        cashVC.viewModel = viewModel
-        cashVC.coordinator = self
+    private func createMoreNavigationController() -> UINavigationController {
+        let moreVC = MoreViewController()
+        moreVC.coordinator = self
 
-        let navController = UINavigationController(rootViewController: cashVC)
+        let navController = UINavigationController(rootViewController: moreVC)
         navController.tabBarItem = UITabBarItem(
-            title: "Cash",
-            image: UIImage(systemName: "banknote"),
-            selectedImage: UIImage(systemName: "banknote.fill")
+            title: "More",
+            image: UIImage(systemName: "ellipsis.circle"),
+            selectedImage: UIImage(systemName: "ellipsis.circle.fill")
         )
         navController.navigationBar.prefersLargeTitles = true
 
@@ -310,19 +295,49 @@ class MainCoordinator: Coordinator {
     // MARK: - Tab Navigation
 
     func showProperties() {
-        tabBarController?.selectedIndex = 1
+        tabBarController?.selectedIndex = TabIndex.properties
     }
 
     func showAssets() {
-        tabBarController?.selectedIndex = 2
+        guard let tabBarController else { return }
+        tabBarController.selectedIndex = TabIndex.more
+
+        guard let nav = tabBarController.viewControllers?[TabIndex.more] as? UINavigationController else { return }
+        nav.popToRootViewController(animated: false)
+
+        let assetsVC = AssetsViewController()
+        let viewModel = AssetViewModel()
+        assetsVC.viewModel = viewModel
+        assetsVC.coordinator = self
+        nav.pushViewController(assetsVC, animated: true)
     }
 
     func showCash() {
-        tabBarController?.selectedIndex = 3
+        guard let tabBarController else { return }
+        tabBarController.selectedIndex = TabIndex.more
+
+        guard let nav = tabBarController.viewControllers?[TabIndex.more] as? UINavigationController else { return }
+        nav.popToRootViewController(animated: false)
+
+        let cashVC = CashAccountsViewController()
+        let viewModel = CashAccountViewModel()
+        cashVC.viewModel = viewModel
+        cashVC.coordinator = self
+        nav.pushViewController(cashVC, animated: true)
     }
 
     func showLiabilities() {
-        tabBarController?.selectedIndex = 4
+        guard let tabBarController else { return }
+        tabBarController.selectedIndex = TabIndex.more
+
+        guard let nav = tabBarController.viewControllers?[TabIndex.more] as? UINavigationController else { return }
+        nav.popToRootViewController(animated: false)
+
+        let liabilitiesVC = LiabilitiesViewController()
+        let viewModel = LiabilityViewModel()
+        liabilitiesVC.viewModel = viewModel
+        liabilitiesVC.coordinator = self
+        nav.pushViewController(liabilitiesVC, animated: true)
     }
 
     func startAddFlow() {

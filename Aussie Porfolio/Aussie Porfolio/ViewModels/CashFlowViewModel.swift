@@ -2,16 +2,8 @@ import Foundation
 import RealmSwift
 internal import Realm
 
-struct CashFlowPropertyItem {
-    let name: String
-    let tag: String
-    let iconSystemName: String
-    let incomeText: String
-    let expensesText: String
-    let netText: String
-    let netIsPositive: Bool
-    let nextPaymentText: String
-}
+
+// MARK: - ViewModel
 
 final class CashFlowViewModel {
     // MARK: - Output
@@ -90,7 +82,7 @@ final class CashFlowViewModel {
 
             return CashFlowPropertyItem(
                 name: property.name.isEmpty ? "Property" : property.name,
-                tag: property.propertyType.uppercased(),
+                tag: tag(for: property),
                 iconSystemName: iconSystemName(for: property.propertyType),
                 incomeText: formatCurrency(income),
                 expensesText: formatCurrency(expenses),
@@ -125,6 +117,15 @@ final class CashFlowViewModel {
         case "house": return "house.fill"
         default: return "building.2"
         }
+    }
+
+    private func tag(for property: Property) -> String {
+        // Map to the two tags used in the SwiftUI design: IP (investment) or PPOR (principal place of residence)
+        let type = property.propertyType.lowercased()
+        if type == "ppor" || type == "home" || type == "residence" {
+            return "PPOR"
+        }
+        return "IP"
     }
 
     private func formatCurrency(_ value: Double) -> String {
