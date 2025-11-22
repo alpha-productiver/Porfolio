@@ -41,6 +41,7 @@ class PropertyViewModel {
                         state: String,
                         purchasePrice: Double,
                         currentValue: Double,
+                        rentalIncome: Double,
                         loanData: (amount: Double, interestRate: Double, loanType: String, monthlyRepayment: Double, frequencyPerYear: Int, customPerPeriod: Double, usesManual: Bool)?,
                         insuranceData: (buildingProvider: String, buildingFrequency: String, buildingAmount: Double, buildingRenewalDate: Date?,
                                       landlordProvider: String, landlordFrequency: String, landlordAmount: Double, landlordRenewalDate: Date?,
@@ -51,6 +52,7 @@ class PropertyViewModel {
             property.state = state
             property.purchasePrice = purchasePrice
             property.currentValue = currentValue
+            property.rentalIncome = rentalIncome
             property.updatedAt = Date()
 
             // Handle loan
