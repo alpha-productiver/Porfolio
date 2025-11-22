@@ -151,11 +151,6 @@ final class CashFlowViewModel {
                 dueText: dueText(for: liability.dueDate)
             )
         }
-
-        normalizedTrendPoints = makeTrendPoints(income: totalIncomeRaw, expenses: totalExpensesRaw, net: netRaw)
-        chartEntries = makeChartEntries(income: totalIncome, expenses: totalExpenses, net: net)
-        expensesBreakdownText = buildExpensesBreakdown(propertyExpenses: propertyExpenses, liabilityPayments: liabilityPayments)
-
         onDataChanged?()
     }
 
@@ -211,32 +206,6 @@ final class CashFlowViewModel {
 
     func liability(withId id: String) -> Liability? {
         liabilities.first { $0.id == id }
-    }
-
-    private func makeTrendPoints(income: Double, expenses: Double, net: Double) -> [CGFloat] {
-        let maxMagnitude = max(abs(income), abs(expenses), abs(net))
-        let safeMax = maxMagnitude.isFinite && maxMagnitude > 0 ? maxMagnitude : 1
-        let incomePoint = min(max(income / safeMax, 0), 1)
-        let expensesPoint = min(max(expenses / safeMax, 0), 1)
-        let netPoint = (CGFloat(net / safeMax) + 1) / 2 // shift to 0...1
-        return [CGFloat(incomePoint), CGFloat(expensesPoint), netPoint]
-    }
-
-    private func makeChartEntries(income: Double, expenses: Double, net: Double) -> [CashFlowChartEntry] {
-        let points = makeTrendPoints(income: income, expenses: expenses, net: net)
-        let titles = ["Income", "Expenses", "Net"]
-        let amounts = [income, expenses, net]
-        return zip(zip(titles, amounts), points).map { pair, normalized in
-            CashFlowChartEntry(title: pair.0, amount: pair.1, normalized: normalized)
-        }
-    }
-
-    private func buildExpensesBreakdown(propertyExpenses: Double, liabilityPayments: Double) -> String {
-        let opex = formatCurrency(propertyExpenses - liabilitiesOnly(propertyExpenses: propertyExpenses, liabilityPayments: liabilityPayments))
-        let loans = formatCurrency(properties.reduce(0) { $0 + ($1.loan?.monthlyRepayment ?? 0) })
-        let insurance = formatCurrency(properties.reduce(0) { $0 + monthlyInsurance(for: $1) })
-        let liabilitiesText = formatCurrency(liabilityPayments)
-        return "Expenses: Opex \(opex) • Loans \(loans) • Insurance \(insurance) • Liabilities \(liabilitiesText)"
     }
 
     private func liabilitiesOnly(propertyExpenses: Double, liabilityPayments: Double) -> Double {

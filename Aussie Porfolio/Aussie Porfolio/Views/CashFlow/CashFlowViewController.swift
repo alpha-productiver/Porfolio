@@ -137,14 +137,14 @@ final class CashFlowViewController: UIViewController {
             monthlyCard,
             title: "Monthly Cash Flow",
             value: viewModel.netCashFlowText,
-            subtitle: "Income: \(viewModel.totalIncomeText) \nExpenses: \(viewModel.totalExpensesText)",
+            subtitle: "Income: \(viewModel.totalIncomeText)\nExpenses: \(viewModel.totalExpensesText)",
             positive: viewModel.isNetPositive
         )
         configureStatCard(
             annualCard,
             title: "Annual Cash Flow",
             value: viewModel.annualNetText,
-            subtitle: "Income: \(viewModel.annualIncomeText) \nExpenses: \(viewModel.annualExpensesText)",
+            subtitle: "Income: \(viewModel.annualIncomeText)\nExpenses: \(viewModel.annualExpensesText)",
             positive: viewModel.isAnnualNetPositive
         )
         expensesLabel.text = viewModel.expensesBreakdownText
@@ -160,19 +160,24 @@ final class CashFlowViewController: UIViewController {
             emptyLabel.isHidden = true
             viewModel.propertyItems.forEach { item in
                 let card = CashFlowPropertyCardView()
-                card.configure(with: item)
+                card.configure(with: item) { [weak self] in
+                    self?.showProperty(id: item.id)
+                }
                 propertiesStack.addArrangedSubview(card)
             }
         }
+    }
+
+    private func showProperty(id: String) {
+        guard let property = viewModel.property(withId: id) else { return }
+        coordinator?.showPropertyDetail(property)
     }
 
     private func configureStatCard(_ card: CardView, title: String, value: String, subtitle: String, positive: Bool) {
         card.titleLabel.text = title
         card.valueLabel.text = value
         card.subtitleLabel.text = subtitle
-        card.style = .neutral
-        card.valueLabel.textColor = positive ? .systemGreen : .systemRed
-        card.iconImageView.tintColor = .systemGreen
+        // Keep existing styling; only adjust text content to avoid unexpected color changes.
     }
 }
 
@@ -198,6 +203,7 @@ private final class CashFlowPropertyCardView: UIView {
 
     private let nextPaymentTitleLabel = UILabel()
     private let nextPaymentValueLabel = UILabel()
+    private var onTap: (() -> Void)?
 
     init() {
         super.init(frame: .zero)
@@ -334,7 +340,8 @@ private final class CashFlowPropertyCardView: UIView {
         }
     }
 
-    func configure(with item: CashFlowPropertyItem) {
+    func configure(with item: CashFlowPropertyItem, onTap: (() -> Void)? = nil) {
+        self.onTap = onTap
         iconView.image = UIImage(systemName: item.iconSystemName)
 
         let accent = item.netIsPositive ? UIColor.systemGreen : UIColor.systemRed
@@ -351,6 +358,14 @@ private final class CashFlowPropertyCardView: UIView {
         netValueLabel.textColor = item.netIsPositive ? .systemGreen : .systemRed
 
         nextPaymentValueLabel.text = item.nextPaymentText
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        addGestureRecognizer(tap)
+        isUserInteractionEnabled = true
+    }
+
+    @objc private func handleTap() {
+        onTap?()
     }
 }
 
