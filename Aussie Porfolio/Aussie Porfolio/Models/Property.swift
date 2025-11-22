@@ -12,8 +12,10 @@ class Property: Object {
     @Persisted var propertyType: String = "house"
     @Persisted var currentValue: Double = 0.0
     @Persisted var purchasePrice: Double = 0.0
-    @Persisted var rentalIncome: Double = 0.0
-    @Persisted var expenses: Double = 0.0
+    @Persisted var rentalIncome: Double = 0.0 // weekly
+    @Persisted var managementFeePercent: Double = 0.0
+    @Persisted var estimatedExpensesAmount: Double = 0.0
+    @Persisted var expensesAreMonthly: Bool = true
     @Persisted var loan: PropertyLoan?
     @Persisted var insurance: PropertyInsurance?
     @Persisted var createdAt = Date()
@@ -28,7 +30,14 @@ class Property: Object {
     }
 
     var netRentalIncome: Double {
-        return rentalIncome - expenses
+        let weeklyNet = rentalIncome - weeklyExpenses
+        return weeklyNet
+    }
+
+    var weeklyExpenses: Double {
+        let base = expensesAreMonthly ? (estimatedExpensesAmount * 12 / 52) : (estimatedExpensesAmount / 52)
+        let management = (managementFeePercent / 100) * rentalIncome
+        return base + management
     }
 }
 

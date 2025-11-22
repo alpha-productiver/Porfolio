@@ -95,12 +95,28 @@ final class CashFlowViewModel {
 
     // MARK: - Calculations
     private func recalculate() {
-        let totalIncome = properties.reduce(0) { $0 + $1.rentalIncome }
+        let incomesMonthly = properties.map { $0.rentalIncome * 52 / 12 }
+        let totalIncome = incomesMonthly.reduce(0, +)
 
-        let propertyExpenses = properties.reduce(0) { total, property in
+        var totalBaseExpenses = 0.0
+        var totalMgmtExpenses = 0.0
+        var totalInsurance = 0.0
+        var totalLoans = 0.0
+
+        let propertyExpenses = properties.enumerated().reduce(0) { total, pair in
+            let property = pair.element
+            let monthlyIncome = incomesMonthly[pair.offset]
             let mortgage = property.loan?.monthlyRepayment ?? 0
             let insurance = monthlyInsurance(for: property)
-            return total + property.expenses + mortgage + insurance
+            let mgmt = (property.managementFeePercent / 100) * monthlyIncome
+            let baseExpenses = property.expensesAreMonthly ? property.estimatedExpensesAmount : property.estimatedExpensesAmount / 12
+
+            totalBaseExpenses += baseExpenses
+            totalMgmtExpenses += mgmt
+            totalInsurance += insurance
+            totalLoans += mortgage
+
+            return total + baseExpenses + mgmt + mortgage + insurance
         }
 
         let liabilityPayments = liabilities.reduce(0) { $0 + max($1.minimumPayment, 0) }
@@ -124,8 +140,10 @@ final class CashFlowViewModel {
         propertyItems = properties.map { property in
             let mortgage = property.loan?.monthlyRepayment ?? 0
             let insurance = monthlyInsurance(for: property)
-            let income = property.rentalIncome
-            let expenses = property.expenses + mortgage + insurance
+            let income = property.rentalIncome * 52 / 12
+            let baseExpenses = property.expensesAreMonthly ? property.estimatedExpensesAmount : property.estimatedExpensesAmount / 12
+            let mgmt = (property.managementFeePercent / 100) * income
+            let expenses = baseExpenses + mgmt + mortgage + insurance
             let netValue = income - expenses
 
             return CashFlowPropertyItem(
@@ -151,6 +169,7 @@ final class CashFlowViewModel {
                 dueText: dueText(for: liability.dueDate)
             )
         }
+        expensesBreakdownText = "Expenses: Base \(formatCurrency(totalBaseExpenses)) • Mgmt \(formatCurrency(totalMgmtExpenses)) • Insurance \(formatCurrency(totalInsurance)) • Loans \(formatCurrency(totalLoans)) • Liabilities \(formatCurrency(liabilityPayments))"
         onDataChanged?()
     }
 

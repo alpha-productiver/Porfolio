@@ -42,6 +42,9 @@ class PropertyViewModel {
                         purchasePrice: Double,
                         currentValue: Double,
                         rentalIncome: Double,
+                        managementFeePercent: Double,
+                        estimatedExpensesAmount: Double,
+                        expensesAreMonthly: Bool,
                         loanData: (amount: Double, interestRate: Double, loanType: String, monthlyRepayment: Double, frequencyPerYear: Int, customPerPeriod: Double, usesManual: Bool)?,
                         insuranceData: (buildingProvider: String, buildingFrequency: String, buildingAmount: Double, buildingRenewalDate: Date?,
                                       landlordProvider: String, landlordFrequency: String, landlordAmount: Double, landlordRenewalDate: Date?,
@@ -53,6 +56,9 @@ class PropertyViewModel {
             property.purchasePrice = purchasePrice
             property.currentValue = currentValue
             property.rentalIncome = rentalIncome
+            property.managementFeePercent = managementFeePercent
+            property.estimatedExpensesAmount = estimatedExpensesAmount
+            property.expensesAreMonthly = expensesAreMonthly
             property.updatedAt = Date()
 
             // Handle loan

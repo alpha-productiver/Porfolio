@@ -60,9 +60,7 @@ final class AddPropertyViewController: UIViewController {
     private let currentValueField = LabeledField(title: "Current Value ($)",
                                                  placeholder: "Leave empty to use purchase price",
                                                  keyboard: .numberPad)
-    private let rentalIncomeField = LabeledField(title: "Monthly Rental Income ($)",
-                                                 placeholder: "e.g. 2,400",
-                                                 keyboard: .numberPad)
+    private let rentalIncomeSection = RentalIncomeSectionView()
 
     // Loan
     private let loanHeader = FormSectionHeader("Loan Details")
@@ -437,7 +435,7 @@ final class AddPropertyViewController: UIViewController {
         contentStack.addArrangedSubview(FormSectionHeader("Financial Details"))
         contentStack.addArrangedSubview(purchaseField)
         contentStack.addArrangedSubview(currentValueField)
-        contentStack.addArrangedSubview(rentalIncomeField)
+        contentStack.addArrangedSubview(rentalIncomeSection)
 
         contentStack.addArrangedSubview(Divider())
 
@@ -1130,8 +1128,8 @@ final class AddPropertyViewController: UIViewController {
         purchaseField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
         currentValueField.textField.delegate = self
         currentValueField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
-        rentalIncomeField.textField.delegate = self
-        rentalIncomeField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
+        rentalIncomeSection.weeklyIncomeField.textField.delegate = self
+        rentalIncomeSection.weeklyIncomeField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
         loanAmountField.textField.delegate = self
         loanAmountField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
         interestRateField.textField.delegate = self
@@ -1169,7 +1167,12 @@ final class AddPropertyViewController: UIViewController {
 
         purchaseField.textField.text = Int(property.purchasePrice).formattedWithSeparator()
         currentValueField.textField.text = Int(property.currentValue).formattedWithSeparator()
-        rentalIncomeField.textField.text = property.rentalIncome > 0 ? Int(property.rentalIncome).formattedWithSeparator() : ""
+        rentalIncomeSection.setValues(
+            weeklyIncome: property.rentalIncome,
+            managementFeePercent: property.managementFeePercent,
+            expensesAmount: property.estimatedExpensesAmount,
+            expensesFrequencyMonthly: property.expensesAreMonthly
+        )
 
         if let loan = property.loan {
             loanAmountField.textField.text = Int(loan.amount).formattedWithSeparator()
@@ -1309,8 +1312,9 @@ final class AddPropertyViewController: UIViewController {
         } else {
             currentValue = purchaseValue
         }
-        let rentalIncomeText = rentalIncomeField.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
-        let rentalIncome = Decimal(string: rentalIncomeText).map { NSDecimalNumber(decimal: $0).doubleValue } ?? 0
+        let rentalIncome = rentalIncomeSection.parsedWeeklyIncome()
+        let managementFeePercent = rentalIncomeSection.parsedManagementFeePercent()
+        let expensesParsed = rentalIncomeSection.parsedExpenses()
 
         // Validate loan if amount is provided
         var loanData: (amount: Double, interestRate: Double, loanType: String, monthlyRepayment: Double, frequencyPerYear: Int, customPerPeriod: Double, usesManual: Bool)? = nil
@@ -1467,6 +1471,9 @@ final class AddPropertyViewController: UIViewController {
                                     purchasePrice: purchaseValue,
                                     currentValue: currentValue,
                                     rentalIncome: rentalIncome,
+                                    managementFeePercent: managementFeePercent,
+                                    estimatedExpensesAmount: expensesParsed.amount,
+                                    expensesAreMonthly: expensesParsed.isMonthly,
                                     loanData: loanData,
                                     insuranceData: insuranceData)
         } else {
@@ -1478,6 +1485,9 @@ final class AddPropertyViewController: UIViewController {
             property.purchasePrice = purchaseValue
             property.currentValue = currentValue
             property.rentalIncome = rentalIncome
+            property.managementFeePercent = managementFeePercent
+            property.estimatedExpensesAmount = expensesParsed.amount
+            property.expensesAreMonthly = expensesParsed.isMonthly
 
             if let loan = loanData {
                 let propertyLoan = PropertyLoan()

@@ -1,34 +1,32 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- App sources live in `Aussie Porfolio/Aussie Porfolio/`, organized by feature: `Models/` (Realm objects), `ViewModels/` (MVVM logic), `Views/` (UIKit controllers & views), `Coordinators/` (navigation), `Services/` (data, e.g., `RealmService`), `Extensions/`, `Utils/`, `LaunchScreen/`, and assets in `Assets.xcassets`.
-- Tests sit beside the app under `Aussie Porfolio/Aussie PorfolioTests` and UI specs in `Aussie Porfolio/Aussie PorfolioUITests`.
-- Project files live in `Aussie Porfolio/Aussie Porfolio.xcodeproj`; the SPM manifest (`Package.swift`) lists Realm.
+- App code lives in `Aussie Porfolio/Aussie Porfolio/` grouped by feature: `DashboardTab/`, `PropertiesTab/`, `CashFlowTab/`, `CashAccountsTab/`, `LiabilitiesTab/`, `AssetsTab/`, plus shared `Models/`, `Services/` (RealmService, coordinators), `Extensions/`, `Utils/`, `Assets.xcassets/`, and `LaunchScreen/`.
+- Each tab folder keeps its view controllers, view models, and local views together; legacy shared views remain under `Views/`.
+- Tests sit in `Aussie Porfolio/Aussie PorfolioTests` and UI automation in `Aussie Porfolio/Aussie PorfolioUITests`.
+- Project file: `Aussie Porfolio/Aussie Porfolio.xcodeproj`; Realm is declared in `Package.swift` (SPM). Ensure newly added files are part of the app target after moving.
 
-## Build, Run, and Development Commands
-- Open the workspace for local dev: `open "Aussie Porfolio/Aussie Porfolio.xcodeproj"` (select the `Aussie Porfolio` scheme).
-- Resolve dependencies (Realm via SPM) if Xcode prompts: File → Add Package → `https://github.com/realm/realm-swift.git` (>=10.45.0).
+## Build, Test, and Development Commands
+- Open the project: `open "Aussie Porfolio/Aussie Porfolio.xcodeproj"` and pick the `Aussie Porfolio` scheme (iOS 16+ deployment).
 - CLI build: `xcodebuild -scheme "Aussie Porfolio" -destination 'platform=iOS Simulator,name=iPhone 15' build`.
 - CLI tests: `xcodebuild test -scheme "Aussie Porfolio" -destination 'platform=iOS Simulator,name=iPhone 15'`.
-- Keep `Pods/` untouched unless you explicitly update CocoaPods; prefer SPM for Realm.
+- If Realm is missing, add the SPM package `https://github.com/realm/realm-swift.git` (>=10.45.0). Keep `Pods/` untouched unless you consciously manage CocoaPods.
 
 ## Coding Style & Naming Conventions
-- Swift 5, UIKit, MVVM + Coordinators; prefer dependency injection and keep navigation logic inside coordinators.
-- Indentation: 4 spaces; favor `final` classes when not subclassed; mark properties `private`/`internal` deliberately.
-- Naming: view controllers end with `ViewController`, view models with `ViewModel`, coordinators with `Coordinator`, Realm models are singular nouns in `Models/`.
-- Group related helpers under `Extensions/` or `Utils/`; keep storyboard-free flow (UI built in code).
+- Swift 5, UIKit + MVVM with Coordinators; prefer dependency injection and keep navigation in coordinators.
+- Indentation: 4 spaces; mark types `final` when appropriate; default to `private`/`fileprivate` for impl details.
+- Naming: `...ViewController`, `...ViewModel`, `...Coordinator`; Realm models are singular nouns in `Models/`. Use clear currency helpers for money display.
+- Avoid duplicating feature types—place Cash Flow pieces in `CashFlowTab/`, Properties in `PropertiesTab/`, etc.
 
 ## Testing Guidelines
-- Unit tests use the new `Testing` framework (`@Test` + `#expect`) in `Aussie PorfolioTests`.
-- Give test files the `Tests.swift` suffix and mirror the module path (e.g., `ViewModels/DashboardViewModelTests.swift`).
-- Add fast, deterministic tests for new business logic; mock Realm where possible to avoid on-disk state.
-- Run `xcodebuild test -scheme "Aussie Porfolio" -destination 'platform=iOS Simulator,name=iPhone 15'` before submitting.
+- Unit tests use the `Testing` framework (`@Test`, `#expect`). Mirror module paths, e.g., `CashFlowTab/CashFlowViewModelTests.swift`.
+- Favor deterministic tests by mocking Realm or using in-memory configs. Add coverage when changing cashflow math or migrations.
+- Run `xcodebuild test ...` before opening PRs; include the exact command/output.
 
 ## Commit & Pull Request Guidelines
-- Follow the existing short, action-first commit style (e.g., "add launch page", "add insurance"). One focused change per commit.
-- PRs: include a concise summary, screenshots for UI changes, linked issue/trello ticket, and the test command/output you ran. Call out new dependencies or migrations explicitly.
-- Keep branches up to date with `main` and resolve merge warnings before requesting review.
+- Commit messages are short and action-first (e.g., `add rental income section`, `fix cashflow stats`). Keep commits focused per concern.
+- PR checklist: summary, screenshots for UI changes, linked issue/ticket, noted migrations (Realm schema v7 currently), and test results. Call out new dependencies or config steps.
 
-## Security & Configuration Notes
-- Do not commit secrets or personal data; sample data belongs in fixtures/tests only.
-- If Realm schema changes, document migration steps in the PR description and update any seed/setup instructions in `README.md`.
+## Data & Migration Notes
+- Realm schema v7 adds loan/rental/expense fields; bump schema and provide migration blocks when altering models.
+- Never commit real secrets or personal data; seed/demo data belongs only in fixtures or local dev helpers.

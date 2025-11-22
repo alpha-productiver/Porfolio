@@ -9,7 +9,7 @@ class RealmService {
     private init() {
         do {
             let config = Realm.Configuration(
-                schemaVersion: 6,
+                schemaVersion: 7,
                 migrationBlock: { migration, oldSchemaVersion in
                     // Migration from v1 to v2: Removed otherCosts, stampDuty, legalFees
                     if oldSchemaVersion < 3 {
@@ -29,6 +29,14 @@ class RealmService {
                             newObject?["repaymentFrequencyPerYear"] = 12
                             newObject?["customPaymentPerPeriod"] = 0.0
                             newObject?["usesManualRepayment"] = false
+                        }
+                    }
+                    // Migration to v7: Added managementFeePercent, estimatedExpensesAmount, expensesAreMonthly to Property; repurpose rentalIncome as weekly
+                    if oldSchemaVersion < 7 {
+                        migration.enumerateObjects(ofType: "Property") { _, newObject in
+                            newObject?["managementFeePercent"] = 0.0
+                            newObject?["estimatedExpensesAmount"] = 0.0
+                            newObject?["expensesAreMonthly"] = true
                         }
                     }
                 },
