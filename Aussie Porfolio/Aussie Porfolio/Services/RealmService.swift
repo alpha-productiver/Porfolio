@@ -9,22 +9,27 @@ class RealmService {
     private init() {
         do {
             let config = Realm.Configuration(
-                schemaVersion: 5,
+                schemaVersion: 6,
                 migrationBlock: { migration, oldSchemaVersion in
                     // Migration from v1 to v2: Removed otherCosts, stampDuty, legalFees
                     if oldSchemaVersion < 3 {
                         // Realm automatically handles removed properties
-                        // No manual migration needed for removed fields
                     }
                     // Migration from v3 to v4: Added insurance field
                     if oldSchemaVersion < 4 {
                         // Realm automatically handles new optional properties
-                        // No manual migration needed for new optional fields
                     }
                     // Migration from v4 to v5: Restructured insurance to separate building and landlord
                     if oldSchemaVersion < 5 {
                         // Realm automatically handles property changes
-                        // No manual migration needed
+                    }
+                    // Migration to v6: Added repaymentFrequencyPerYear, customPaymentPerPeriod, usesManualRepayment to PropertyLoan
+                    if oldSchemaVersion < 6 {
+                        migration.enumerateObjects(ofType: "PropertyLoan") { _, newObject in
+                            newObject?["repaymentFrequencyPerYear"] = 12
+                            newObject?["customPaymentPerPeriod"] = 0.0
+                            newObject?["usesManualRepayment"] = false
+                        }
                     }
                 },
                 deleteRealmIfMigrationNeeded: false

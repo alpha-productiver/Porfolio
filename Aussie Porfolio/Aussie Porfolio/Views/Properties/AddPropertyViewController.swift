@@ -78,6 +78,70 @@ final class AddPropertyViewController: UIViewController {
     private let interestRateField = LabeledField(title: "Interest Rate (%)",
                                                  placeholder: "6.0",
                                                  keyboard: .decimalPad)
+    private enum RepaymentFrequency: String, CaseIterable {
+        case weekly = "Weekly"
+        case fortnightly = "Fortnightly"
+        case monthly = "Monthly"
+        case custom = "Custom"
+
+        var paymentsPerYear: Double {
+            switch self {
+            case .weekly: return 52
+            case .fortnightly: return 26
+            case .monthly: return 12
+            case .custom: return 0
+            }
+        }
+    }
+    private var selectedFrequency: RepaymentFrequency = .monthly
+    private var frequencyPaymentsPerYear: Double = 12
+    private let frequencyButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.setTitle("Monthly (12/yr)", for: .normal)
+        b.contentHorizontalAlignment = .left
+        b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        b.backgroundColor = .systemBackground
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = UIColor.separator.cgColor
+        b.titleLabel?.font = .systemFont(ofSize: 15)
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return b
+    }()
+    private let customPaymentsField = LabeledField(title: "Custom Payments per Year",
+                                                   placeholder: "e.g. 24",
+                                                   keyboard: .numberPad)
+    private let enterRepaymentManuallySwitch: UISwitch = {
+        let s = UISwitch()
+        s.onTintColor = .systemGreen
+        return s
+    }()
+    private let assumedLoanTermYears: Double = 30
+    private let interestOnlySwitch: UISwitch = {
+        let s = UISwitch()
+        s.onTintColor = .systemGreen
+        return s
+    }()
+    private let customRepaymentField = LabeledField(title: "Custom Repayment Amount ($ per payment)",
+                                                    placeholder: "Optional",
+                                                    keyboard: .decimalPad)
+    private let repaymentSummaryLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .systemBlue
+        l.numberOfLines = 0
+        l.isHidden = true
+        return l
+    }()
+    private let loanNotesLabel: UILabel = {
+        let l = UILabel()
+        l.text = "Repayments auto-calculate from amount, rate, and frequency. Override with a custom payment or custom frequency if needed. P&L updates after save."
+        l.font = .systemFont(ofSize: 12)
+        l.textColor = .secondaryLabel
+        l.numberOfLines = 0
+        return l
+    }()
 
     // Insurance
     private let insuranceHeader = FormSectionHeader("Insurance Details (Optional)")
@@ -298,9 +362,12 @@ final class AddPropertyViewController: UIViewController {
         configureBuildingFrequencyMenu()
         configureLandlordFrequencyMenu()
         configureSameProviderCheckbox()
+        configureFrequencyMenu()
         addDoneToolbarToKeyboards()
         setupInsuranceCalculation()
         populateFieldsIfEditing()
+        updateLoanNotes()
+        updateRepaymentSummary()
     }
 
     // MARK: - Nav
@@ -379,6 +446,57 @@ final class AddPropertyViewController: UIViewController {
         loanContainer.spacing = 14
         loanContainer.addArrangedSubview(loanAmountField)
         loanContainer.addArrangedSubview(interestRateField)
+
+        let loanModeStack = UIStackView()
+        loanModeStack.axis = .vertical
+        loanModeStack.spacing = 8
+
+        let interestOnlyRow = UIStackView()
+        interestOnlyRow.axis = .horizontal
+        interestOnlyRow.alignment = .center
+        interestOnlyRow.spacing = 12
+        let interestOnlyLabel = UILabel()
+        interestOnlyLabel.text = "Interest-only"
+        interestOnlyLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        interestOnlyLabel.textColor = .label
+
+        let manualLabel = UILabel()
+        manualLabel.text = "Enter repayment manually"
+        manualLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        manualLabel.textColor = .label
+
+        interestOnlyRow.addArrangedSubview(interestOnlyLabel)
+        interestOnlyRow.addArrangedSubview(UIView())
+        interestOnlyRow.addArrangedSubview(interestOnlySwitch)
+
+        let manualRow = UIStackView(arrangedSubviews: [manualLabel, UIView(), enterRepaymentManuallySwitch])
+        manualRow.axis = .horizontal
+        manualRow.spacing = 8
+        manualRow.alignment = .center
+
+        loanModeStack.addArrangedSubview(interestOnlyRow)
+        loanModeStack.addArrangedSubview(manualRow)
+        loanContainer.addArrangedSubview(loanModeStack)
+        enterRepaymentManuallySwitch.addTarget(self, action: #selector(toggleManualEntry(_:)), for: .valueChanged)
+        interestOnlySwitch.addTarget(self, action: #selector(fieldDidChange), for: .valueChanged)
+
+        let frequencyStack = UIStackView()
+        frequencyStack.axis = .vertical
+        frequencyStack.spacing = 6
+        let frequencyLabel = UILabel()
+        frequencyLabel.text = "Repayment Frequency"
+        frequencyLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        frequencyLabel.textColor = .secondaryLabel
+        frequencyStack.addArrangedSubview(frequencyLabel)
+        frequencyStack.addArrangedSubview(frequencyButton)
+        loanContainer.addArrangedSubview(frequencyStack)
+        customPaymentsField.isHidden = true
+        customRepaymentField.isHidden = true
+        repaymentSummaryLabel.isHidden = true
+        loanContainer.addArrangedSubview(customPaymentsField)
+        loanContainer.addArrangedSubview(customRepaymentField)
+        loanContainer.addArrangedSubview(repaymentSummaryLabel)
+        loanContainer.addArrangedSubview(loanNotesLabel)
         contentStack.addArrangedSubview(loanContainer)
 
         contentStack.addArrangedSubview(Divider())
@@ -632,6 +750,100 @@ final class AddPropertyViewController: UIViewController {
         }
         landlordFrequencyButton.menu = UIMenu(children: actions)
         landlordFrequencyButton.showsMenuAsPrimaryAction = true
+    }
+
+    private func configureFrequencyMenu() {
+        let actions = RepaymentFrequency.allCases.map { freq in
+            UIAction(title: freq.rawValue, state: freq == selectedFrequency ? .on : .off) { [weak self] _ in
+                guard let self else { return }
+                selectedFrequency = freq
+                switch freq {
+                case .custom:
+                    customPaymentsField.isHidden = false
+                    frequencyPaymentsPerYear = 0
+                    frequencyButton.setTitle("Custom (enter payments/yr)", for: .normal)
+                default:
+                    customPaymentsField.isHidden = enterRepaymentManuallySwitch.isOn == false
+                    frequencyPaymentsPerYear = freq.paymentsPerYear
+                    let title = "\(freq.rawValue) (\(Int(freq.paymentsPerYear))/yr)"
+                    frequencyButton.setTitle(title, for: .normal)
+                }
+                updateLoanNotes()
+                updateRepaymentSummary()
+            }
+        }
+        frequencyButton.menu = UIMenu(children: actions)
+        frequencyButton.showsMenuAsPrimaryAction = true
+    }
+
+    @objc private func toggleManualEntry(_ sender: UISwitch) {
+        customPaymentsField.isHidden = !sender.isOn && selectedFrequency != .custom ? true : false
+        customRepaymentField.isHidden = !sender.isOn
+        updateLoanNotes()
+        updateRepaymentSummary()
+    }
+
+    private func updateLoanNotes() {
+        if enterRepaymentManuallySwitch.isOn {
+            loanNotesLabel.text = "Enter repayments manually using frequency and amount. P&L will respect these values."
+        } else {
+            loanNotesLabel.text = "Repayments auto-calculate from amount, rate, and frequency (minimum interest). Override by enabling manual entry."
+        }
+    }
+
+    private func parsedDouble(from field: LabeledField) -> Double? {
+        let raw = field.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
+        guard let value = Double(raw), value > 0 else { return nil }
+        return value
+    }
+
+    private func currentPaymentsPerYear() -> Double {
+        if selectedFrequency == .custom {
+            return parsedDouble(from: customPaymentsField) ?? 0
+        }
+        return frequencyPaymentsPerYear
+    }
+
+    private func computeRepayment() -> (monthly: Double, yearly: Double) {
+        guard let amount = parsedDouble(from: loanAmountField),
+              let rate = parsedDouble(from: interestRateField) else {
+            return (0, 0)
+        }
+
+        let paymentsPerYear = currentPaymentsPerYear()
+        guard paymentsPerYear > 0 else { return (0, 0) }
+
+        // Manual override
+        if enterRepaymentManuallySwitch.isOn,
+           let customPayment = parsedDouble(from: customRepaymentField),
+           customPayment > 0 {
+            let monthly = (customPayment * paymentsPerYear) / 12
+            return (monthly, monthly * 12)
+        }
+
+        let periodicRate = (rate / 100) / paymentsPerYear
+        if interestOnlySwitch.isOn {
+            let monthly = amount * (rate / 100) / 12
+            return (monthly, monthly * 12)
+        } else {
+            let n = assumedLoanTermYears * paymentsPerYear
+            guard periodicRate > 0, n > 0 else { return (0, 0) }
+            let perPayment = amount * periodicRate / (1 - pow(1 + periodicRate, -n))
+            let monthly = perPayment * paymentsPerYear / 12
+            return (monthly, monthly * 12)
+        }
+    }
+
+    private func updateRepaymentSummary() {
+        let calc = computeRepayment()
+        guard calc.monthly > 0 else {
+            repaymentSummaryLabel.isHidden = true
+            return
+        }
+
+        repaymentSummaryLabel.isHidden = false
+        let mode = interestOnlySwitch.isOn ? "Interest-only" : "P&I"
+        repaymentSummaryLabel.text = "Est. repayment (\(mode)): $\(Int(calc.monthly).formattedWithSeparator()) / month • $\(Int(calc.yearly).formattedWithSeparator()) / year"
     }
 
     private func configureCombinedProviderMenu() {
@@ -896,6 +1108,8 @@ final class AddPropertyViewController: UIViewController {
          currentValueField.textField,
          loanAmountField.textField,
          interestRateField.textField,
+         customPaymentsField.textField,
+         customRepaymentField.textField,
          combinedAmountField.textField,
          buildingAmountField.textField,
          landlordAmountField.textField].forEach { tf in
@@ -914,6 +1128,12 @@ final class AddPropertyViewController: UIViewController {
         currentValueField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
         loanAmountField.textField.delegate = self
         loanAmountField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
+        interestRateField.textField.delegate = self
+        interestRateField.textField.addTarget(self, action: #selector(fieldDidChange), for: .editingChanged)
+        customPaymentsField.textField.delegate = self
+        customPaymentsField.textField.addTarget(self, action: #selector(fieldDidChange), for: .editingChanged)
+        customRepaymentField.textField.delegate = self
+        customRepaymentField.textField.addTarget(self, action: #selector(currencyFieldDidChange(_:)), for: .editingChanged)
     }
 
     @objc private func currencyFieldDidChange(_ textField: UITextField) {
@@ -924,6 +1144,11 @@ final class AddPropertyViewController: UIViewController {
         if let number = Int(numbersOnly) {
             textField.text = number.formattedWithSeparator()
         }
+        updateRepaymentSummary()
+    }
+
+    @objc private func fieldDidChange() {
+        updateRepaymentSummary()
     }
 
     private func populateFieldsIfEditing() {
@@ -942,7 +1167,30 @@ final class AddPropertyViewController: UIViewController {
         if let loan = property.loan {
             loanAmountField.textField.text = Int(loan.amount).formattedWithSeparator()
             interestRateField.textField.text = "\(loan.interestRate)"
+            interestOnlySwitch.isOn = loan.loanType.lowercased() == "interest-only"
+
+            let freqPerYear = loan.repaymentFrequencyPerYear > 0 ? loan.repaymentFrequencyPerYear : 12
+            frequencyPaymentsPerYear = Double(freqPerYear)
+            switch freqPerYear {
+            case 52: selectedFrequency = .weekly; frequencyButton.setTitle("Weekly (52/yr)", for: .normal)
+            case 26: selectedFrequency = .fortnightly; frequencyButton.setTitle("Fortnightly (26/yr)", for: .normal)
+            case 12: selectedFrequency = .monthly; frequencyButton.setTitle("Monthly (12/yr)", for: .normal)
+            default:
+                selectedFrequency = .custom
+                frequencyButton.setTitle("Custom (enter payments/yr)", for: .normal)
+                customPaymentsField.textField.text = "\(freqPerYear)"
+                customPaymentsField.isHidden = false
+            }
+
+            if loan.usesManualRepayment {
+                enterRepaymentManuallySwitch.isOn = true
+                customRepaymentField.isHidden = false
+                if loan.customPaymentPerPeriod > 0 {
+                    customRepaymentField.textField.text = String(format: "%.0f", loan.customPaymentPerPeriod)
+                }
+            }
         }
+        updateRepaymentSummary()
 
         if let insurance = property.insurance {
             // Check if both insurances have the same data (sameProvider flag)
@@ -1056,7 +1304,7 @@ final class AddPropertyViewController: UIViewController {
         }
 
         // Validate loan if amount is provided
-        var loanData: (amount: Double, interestRate: Double)? = nil
+        var loanData: (amount: Double, interestRate: Double, loanType: String, monthlyRepayment: Double, frequencyPerYear: Int, customPerPeriod: Double, usesManual: Bool)? = nil
         if let loanAmountText = loanAmountField.textField.text,
            !loanAmountText.isEmpty {
             let loanAmountClean = loanAmountText.replacingOccurrences(of: ",", with: "")
@@ -1070,7 +1318,15 @@ final class AddPropertyViewController: UIViewController {
                     showAlert("Please enter an interest rate for the loan."); return
                 }
 
-                loanData = (NSDecimalNumber(decimal: amt).doubleValue, NSDecimalNumber(decimal: ir).doubleValue)
+                let amount = NSDecimalNumber(decimal: amt).doubleValue
+                let rate = NSDecimalNumber(decimal: ir).doubleValue
+
+                let calc = computeRepayment()
+                let paymentsPerYear = currentPaymentsPerYear()
+                let customPerPeriod = enterRepaymentManuallySwitch.isOn ? (parsedDouble(from: customRepaymentField) ?? 0) : 0
+                let loanType = interestOnlySwitch.isOn ? "interest-only" : "principal-and-interest"
+
+                loanData = (amount, rate, loanType, calc.monthly, Int(paymentsPerYear), customPerPeriod, enterRepaymentManuallySwitch.isOn)
             }
         }
 
@@ -1216,7 +1472,11 @@ final class AddPropertyViewController: UIViewController {
                 let propertyLoan = PropertyLoan()
                 propertyLoan.amount = loan.amount
                 propertyLoan.interestRate = loan.interestRate
-                propertyLoan.loanType = "variable"
+                propertyLoan.loanType = loan.loanType
+                propertyLoan.monthlyRepayment = loan.monthlyRepayment
+                propertyLoan.repaymentFrequencyPerYear = loan.frequencyPerYear
+                propertyLoan.customPaymentPerPeriod = loan.customPerPeriod
+                propertyLoan.usesManualRepayment = loan.usesManual
                 property.loan = propertyLoan
             }
 

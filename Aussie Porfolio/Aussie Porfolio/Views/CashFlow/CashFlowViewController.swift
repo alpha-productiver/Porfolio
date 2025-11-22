@@ -1,21 +1,5 @@
 import UIKit
-import RealmSwift
 import SnapKit
-
-// MARK: - View Model DTO
-
-struct CashFlowPropertyItem {
-    let name: String
-    let tag: String
-    let iconSystemName: String
-    let incomeText: String
-    let expensesText: String
-    let netText: String
-    let netIsPositive: Bool
-    let nextPaymentText: String
-}
-
-// MARK: - ViewController
 
 final class CashFlowViewController: UIViewController {
     var viewModel: CashFlowViewModel!
@@ -31,7 +15,29 @@ final class CashFlowViewController: UIViewController {
         return stack
     }()
 
-    private let summaryCard = CashFlowSummaryCardView()
+    private let monthlyCard: CardView = {
+        let c = CardView(style: .neutral)
+        c.titleLabel.text = "Monthly Cash Flow"
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
+        c.iconImageView.image = UIImage(systemName: "banknote.fill", withConfiguration: config)
+        return c
+    }()
+
+    private let annualCard: CardView = {
+        let c = CardView(style: .neutral)
+        c.titleLabel.text = "Annual Cash Flow"
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
+        c.iconImageView.image = UIImage(systemName: "banknote.fill", withConfiguration: config)
+        return c
+    }()
+
+    private let expensesLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        return label
+    }()
 
     private let propertiesHeader: UILabel = {
         let label = UILabel()
@@ -81,7 +87,15 @@ final class CashFlowViewController: UIViewController {
             make.width.equalTo(scrollView.frameLayoutGuide)
         }
 
-        contentStack.addArrangedSubview(summaryCard)
+        let statRow = UIStackView(arrangedSubviews: [monthlyCard, annualCard])
+        statRow.axis = .horizontal
+        statRow.spacing = 12
+        statRow.distribution = .fillEqually
+        contentStack.addArrangedSubview(statRow)
+        [monthlyCard, annualCard].forEach { card in
+            card.snp.makeConstraints { $0.height.equalTo(140) }
+        }
+        contentStack.addArrangedSubview(expensesLabel)
 
         let propertiesContainer = UIView()
         propertiesContainer.backgroundColor = .clear
@@ -119,12 +133,21 @@ final class CashFlowViewController: UIViewController {
     }
 
     private func apply() {
-        summaryCard.configure(
-            incomeText: viewModel.totalIncomeText,
-            expensesText: viewModel.totalExpensesText,
-            netText: viewModel.netCashFlowText,
-            isPositive: viewModel.isNetPositive
+        configureStatCard(
+            monthlyCard,
+            title: "Monthly Cash Flow",
+            value: viewModel.netCashFlowText,
+            subtitle: "Income: \(viewModel.totalIncomeText) \nExpenses: \(viewModel.totalExpensesText)",
+            positive: viewModel.isNetPositive
         )
+        configureStatCard(
+            annualCard,
+            title: "Annual Cash Flow",
+            value: viewModel.annualNetText,
+            subtitle: "Income: \(viewModel.annualIncomeText) \nExpenses: \(viewModel.annualExpensesText)",
+            positive: viewModel.isAnnualNetPositive
+        )
+        expensesLabel.text = viewModel.expensesBreakdownText
 
         propertiesStack.arrangedSubviews.forEach { view in
             propertiesStack.removeArrangedSubview(view)
@@ -142,241 +165,14 @@ final class CashFlowViewController: UIViewController {
             }
         }
     }
-}
 
-// MARK: - Summary Card (This Month)
-
-private final class CashFlowSummaryCardView: UIView {
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "This Month"
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .label
-        return label
-    }()
-
-    private let incomeMetric = CashFlowMetricView(title: "Income", icon: "arrow.up.right")
-    private let expenseMetric = CashFlowMetricView(title: "Expenses", icon: "arrow.down.right")
-
-    private let netTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Net"
-        label.font = UIFont.preferredFont(forTextStyle: .caption1)
-        label.textColor = .secondaryLabel
-        return label
-    }()
-
-    private let netValueLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .semibold)
-        label.textColor = .systemGreen
-        return label
-    }()
-
-    private let sparkline = CashFlowSparklineView()
-
-    private let leftTimelineLabel: UILabel = {
-        let label = UILabel()
-        label.text = "6 months ago"
-        label.font = UIFont.preferredFont(forTextStyle: .caption2)
-        label.textColor = .secondaryLabel
-        return label
-    }()
-
-    private let rightTimelineLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Now"
-        label.font = UIFont.preferredFont(forTextStyle: .caption2)
-        label.textColor = .secondaryLabel
-        label.textAlignment = .right
-        return label
-    }()
-
-    init() {
-        super.init(frame: .zero)
-        setupStyle()
-        build()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupStyle() {
-        backgroundColor = .white
-        layer.cornerRadius = 24
-        layer.masksToBounds = false
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.06
-        layer.shadowOffset = CGSize(width: 0, height: 10)
-        layer.shadowRadius = 20
-    }
-
-    private func build() {
-        let netStack = UIStackView(arrangedSubviews: [netTitleLabel, netValueLabel])
-        netStack.axis = .vertical
-        netStack.spacing = 4
-
-        let metricsStack = UIStackView(arrangedSubviews: [incomeMetric, expenseMetric, netStack])
-        metricsStack.axis = .horizontal
-        metricsStack.spacing = 12
-        metricsStack.alignment = .top
-        metricsStack.distribution = .fillEqually
-
-        let divider = UIView()
-        divider.backgroundColor = .systemGray5
-        divider.snp.makeConstraints { $0.height.equalTo(1) }
-
-        let timelineStack = UIStackView(arrangedSubviews: [leftTimelineLabel, rightTimelineLabel])
-        timelineStack.axis = .horizontal
-        timelineStack.alignment = .center
-        timelineStack.distribution = .fill
-
-        addSubview(titleLabel)
-        addSubview(metricsStack)
-        addSubview(divider)
-        addSubview(sparkline)
-        addSubview(timelineStack)
-
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-        }
-
-        metricsStack.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-        }
-
-        divider.snp.makeConstraints { make in
-            make.top.equalTo(metricsStack.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-        }
-
-        sparkline.snp.makeConstraints { make in
-            make.top.equalTo(divider.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(70)
-        }
-
-        timelineStack.snp.makeConstraints { make in
-            make.top.equalTo(sparkline.snp.bottom).offset(8)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.bottom.equalToSuperview().inset(16)
-        }
-    }
-
-    func configure(incomeText: String, expensesText: String, netText: String, isPositive: Bool) {
-        incomeMetric.configure(value: incomeText, isPositive: true)
-        expenseMetric.configure(value: expensesText, isPositive: false)
-        netValueLabel.text = netText
-        netValueLabel.textColor = isPositive ? .systemGreen : .systemRed
-        sparkline.isPositive = isPositive
-    }
-}
-
-// MARK: - Metric Subview
-
-private final class CashFlowMetricView: UIView {
-    private let titleLabel = UILabel()
-    private let valueLabel = UILabel()
-    private let iconView = UIImageView()
-
-    init(title: String, icon: String) {
-        super.init(frame: .zero)
-
-        titleLabel.text = title
-        titleLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
-        titleLabel.textColor = .secondaryLabel
-
-        iconView.image = UIImage(systemName: icon)
-        iconView.contentMode = .scaleAspectFit
-        iconView.tintColor = .systemGreen
-
-        valueLabel.font = .systemFont(ofSize: 17, weight: .semibold)
-        valueLabel.textColor = .systemGreen
-
-        build()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func build() {
-        let bottomRow = UIStackView(arrangedSubviews: [iconView, valueLabel])
-        bottomRow.axis = .horizontal
-        bottomRow.spacing = 4
-        bottomRow.alignment = .center
-
-        let rootStack = UIStackView(arrangedSubviews: [titleLabel, bottomRow])
-        rootStack.axis = .vertical
-        rootStack.spacing = 4
-
-        addSubview(rootStack)
-
-        iconView.snp.makeConstraints { make in
-            make.width.height.equalTo(14)
-        }
-
-        rootStack.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-    }
-
-    func configure(value: String, isPositive: Bool) {
-        valueLabel.text = value
-        let color: UIColor = isPositive ? .systemGreen : .systemRed
-        valueLabel.textColor = color
-        iconView.tintColor = color
-    }
-}
-
-// MARK: - Sparkline
-
-private final class CashFlowSparklineView: UIView {
-    var isPositive: Bool = true { didSet { setNeedsDisplay() } }
-    private let points: [CGFloat] = [0.2, 0.55, 0.35, 0.7, 0.5, 0.8]
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        backgroundColor = .clear
-        isOpaque = false
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    override func draw(_ rect: CGRect) {
-        guard points.count > 1 else { return }
-        let path = UIBezierPath()
-        let stepX = rect.width / CGFloat(points.count - 1)
-
-        for (index, point) in points.enumerated() {
-            let x = CGFloat(index) * stepX
-            let y = rect.height * (1 - point)
-            let currentPoint = CGPoint(x: x, y: y)
-            if index == 0 {
-                path.move(to: currentPoint)
-            } else {
-                path.addLine(to: currentPoint)
-            }
-        }
-
-        let strokeColor: UIColor = isPositive ? .systemGreen : .systemRed
-        strokeColor.setStroke()
-        path.lineWidth = 2
-        path.stroke()
-
-        for (index, point) in points.enumerated() {
-            let x = CGFloat(index) * stepX
-            let y = rect.height * (1 - point)
-            let dotRect = CGRect(x: x - 3, y: y - 3, width: 6, height: 6)
-            let dotPath = UIBezierPath(ovalIn: dotRect)
-            strokeColor.setFill()
-            dotPath.fill()
-        }
+    private func configureStatCard(_ card: CardView, title: String, value: String, subtitle: String, positive: Bool) {
+        card.titleLabel.text = title
+        card.valueLabel.text = value
+        card.subtitleLabel.text = subtitle
+        card.style = .neutral
+        card.valueLabel.textColor = positive ? .systemGreen : .systemRed
+        card.iconImageView.tintColor = .systemGreen
     }
 }
 
@@ -438,6 +234,8 @@ private final class CashFlowPropertyCardView: UIView {
         tagLabel.textAlignment = .center
         tagLabel.horizontalPadding = 8
         tagLabel.verticalPadding = 2
+        tagLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        tagLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         chevronView.tintColor = .tertiaryLabel
         chevronView.contentMode = .scaleAspectFit
@@ -477,8 +275,9 @@ private final class CashFlowPropertyCardView: UIView {
 
         let nameAndTagStack = UIStackView(arrangedSubviews: [nameLabel, tagLabel])
         nameAndTagStack.axis = .horizontal
-        nameAndTagStack.alignment = .center
+        nameAndTagStack.alignment = .leading
         nameAndTagStack.spacing = 8
+        nameLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let spacer = UIView()
         let headerRightStack = UIStackView(arrangedSubviews: [nameAndTagStack, spacer, chevronView])

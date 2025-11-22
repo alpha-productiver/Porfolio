@@ -37,6 +37,9 @@ class PropertyLoan: Object {
     @Persisted var interestRate: Double = 0.0
     @Persisted var loanType: String = "variable"
     @Persisted var monthlyRepayment: Double = 0.0
+    @Persisted var repaymentFrequencyPerYear: Int = 12
+    @Persisted var customPaymentPerPeriod: Double = 0.0
+    @Persisted var usesManualRepayment: Bool = false
 
     var annualInterest: Double {
         return amount * (interestRate / 100)

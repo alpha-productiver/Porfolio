@@ -41,7 +41,7 @@ class PropertyViewModel {
                         state: String,
                         purchasePrice: Double,
                         currentValue: Double,
-                        loanData: (amount: Double, interestRate: Double)?,
+                        loanData: (amount: Double, interestRate: Double, loanType: String, monthlyRepayment: Double, frequencyPerYear: Int, customPerPeriod: Double, usesManual: Bool)?,
                         insuranceData: (buildingProvider: String, buildingFrequency: String, buildingAmount: Double, buildingRenewalDate: Date?,
                                       landlordProvider: String, landlordFrequency: String, landlordAmount: Double, landlordRenewalDate: Date?,
                                       sameProvider: Bool)? = nil) {
@@ -59,12 +59,21 @@ class PropertyViewModel {
                     // Update existing loan
                     existingLoan.amount = loan.amount
                     existingLoan.interestRate = loan.interestRate
+                    existingLoan.loanType = loan.loanType
+                    existingLoan.monthlyRepayment = loan.monthlyRepayment
+                    existingLoan.repaymentFrequencyPerYear = loan.frequencyPerYear
+                    existingLoan.customPaymentPerPeriod = loan.customPerPeriod
+                    existingLoan.usesManualRepayment = loan.usesManual
                 } else {
                     // Create new loan
                     let newLoan = PropertyLoan()
                     newLoan.amount = loan.amount
                     newLoan.interestRate = loan.interestRate
-                    newLoan.loanType = "variable"
+                    newLoan.loanType = loan.loanType
+                    newLoan.monthlyRepayment = loan.monthlyRepayment
+                    newLoan.repaymentFrequencyPerYear = loan.frequencyPerYear
+                    newLoan.customPaymentPerPeriod = loan.customPerPeriod
+                    newLoan.usesManualRepayment = loan.usesManual
                     property.loan = newLoan
                 }
             } else {
