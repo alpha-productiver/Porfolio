@@ -1,12 +1,22 @@
 import UIKit
+import SnapKit
 
 /// Simple reusable view to capture rental income and related costs.
 final class RentalIncomeSectionView: UIView {
     private let headerLabel: UILabel = {
         let label = UILabel()
-        label.text = "Rental Income & Costs"
+        label.text = "Rental Income"
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.textColor = .label
+        return label
+    }()
+
+    private let weeklyIncomeNoteLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Enter weekly rent only"
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
         return label
     }()
 
@@ -23,30 +33,37 @@ final class RentalIncomeSectionView: UIView {
     }()
 
     let expensesAmountField: LabeledField = {
-        LabeledField(title: "Property Expenses ($)",
+        LabeledField(title: "Other Property Expenses ($/year)",
                      placeholder: "Optional",
                      keyboard: .numberPad)
     }()
 
-    let expensesFrequencyControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["Monthly", "Yearly"])
-        control.selectedSegmentIndex = 0
-        return control
+    private let annualSummaryLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        return label
     }()
+
+    private var purchasePrice: Double?
+    private var monthlyLoanRepayment: Double?
 
     private lazy var helperButton: UIButton = {
         let b = UIButton(type: .system)
         b.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
         b.tintColor = .secondaryLabel
         b.addTarget(self, action: #selector(showHelper), for: .touchUpInside)
-        b.widthAnchor.constraint(equalToConstant: 22).isActive = true
-        b.heightAnchor.constraint(equalToConstant: 22).isActive = true
         return b
     }()
 
     init() {
         super.init(frame: .zero)
         build()
+        weeklyIncomeField.textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        managementFeeField.textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        expensesAmountField.textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        updateAnnualSummary()
     }
 
     required init?(coder: NSCoder) {
@@ -54,35 +71,37 @@ final class RentalIncomeSectionView: UIView {
     }
 
     private func build() {
-        let freqRow = UIStackView(arrangedSubviews: [expensesAmountField, expensesFrequencyControl])
-        freqRow.axis = .horizontal
-        freqRow.spacing = 12
-        freqRow.distribution = .fillProportionally
-        expensesAmountField.widthAnchor.constraint(equalTo: freqRow.widthAnchor, multiplier: 0.55).isActive = true
-
         let headerRow = UIStackView(arrangedSubviews: [headerLabel, helperButton])
         headerRow.axis = .horizontal
         headerRow.alignment = .center
         headerRow.spacing = 8
 
-        let stack = UIStackView(arrangedSubviews: [headerRow, weeklyIncomeField, managementFeeField, freqRow])
+        let stack = UIStackView(arrangedSubviews: [headerRow, weeklyIncomeField, weeklyIncomeNoteLabel, managementFeeField, expensesAmountField, annualSummaryLabel])
         stack.axis = .vertical
         stack.spacing = 8
         addSubview(stack)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+
+        helperButton.snp.makeConstraints { make in
+            make.size.equalTo(22)
+        }
+
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
     }
 
     func setValues(weeklyIncome: Double, managementFeePercent: Double, expensesAmount: Double, expensesFrequencyMonthly: Bool) {
         weeklyIncomeField.textField.text = weeklyIncome > 0 ? Int(weeklyIncome).formattedWithSeparator() : ""
         managementFeeField.textField.text = managementFeePercent > 0 ? String(format: "%.2f", managementFeePercent) : ""
         expensesAmountField.textField.text = expensesAmount > 0 ? Int(expensesAmount).formattedWithSeparator() : ""
-        expensesFrequencyControl.selectedSegmentIndex = expensesFrequencyMonthly ? 0 : 1
+        updateAnnualSummary()
+    }
+
+    /// Update contextual values used in the summary (purchase price and loan repayment).
+    func updateFinancialContext(purchasePrice: Double?, monthlyLoanRepayment: Double?) {
+        self.purchasePrice = purchasePrice
+        self.monthlyLoanRepayment = monthlyLoanRepayment
+        updateAnnualSummary()
     }
 
     func parsedWeeklyIncome() -> Double {
@@ -98,8 +117,50 @@ final class RentalIncomeSectionView: UIView {
     func parsedExpenses() -> (amount: Double, isMonthly: Bool) {
         let raw = expensesAmountField.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
         let amt = Double(raw) ?? 0
-        let monthly = expensesFrequencyControl.selectedSegmentIndex == 0
-        return (amt, monthly)
+        // Expenses captured here are treated as monthly by default.
+        return (amt, true)
+    }
+
+    @objc private func textDidChange() {
+        updateAnnualSummary()
+    }
+
+    private func updateAnnualSummary() {
+        let weeklyIncome = parsedWeeklyIncome()
+        let annualIncome = weeklyIncome * 52
+
+        let managementPercent = parsedManagementFeePercent()
+        let expenses = parsedExpenses()
+
+        let annualMgmt = (managementPercent / 100) * annualIncome
+        let annualLoan = (monthlyLoanRepayment ?? 0) * 12
+        let annualBase = expenses.amount * 12 // treated as monthly input
+        let totalCosts = annualBase + annualMgmt + annualLoan
+        let net = annualIncome - totalCosts
+
+        let effectivePurchase = purchasePrice ?? 0
+        let grossYieldText: String
+        if effectivePurchase > 0 {
+            let yield = annualIncome / effectivePurchase * 100
+            grossYieldText = String(format: "%.2f%% gross yield", yield)
+        } else {
+            grossYieldText = "-- gross yield"
+        }
+
+        let attributed = NSMutableAttributedString(
+            string: "Annual Income: $\(Int(annualIncome).formattedWithSeparator())\n",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        )
+        attributed.append(NSAttributedString(
+            string: "\(grossYieldText)\n",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        ))
+        attributed.append(NSAttributedString(
+            string: "Net: $\(Int(net).formattedWithSeparator())",
+            attributes: [.foregroundColor: net >= 0 ? UIColor.systemGreen : UIColor.systemRed]
+        ))
+
+        annualSummaryLabel.attributedText = attributed
     }
 
     @objc private func showHelper() {

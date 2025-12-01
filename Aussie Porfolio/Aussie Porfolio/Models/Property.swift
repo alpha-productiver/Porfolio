@@ -58,21 +58,21 @@ class PropertyLoan: Object {
 class PropertyInsurance: Object {
     // Building Insurance
     @Persisted var buildingProvider: String = ""
-    @Persisted var buildingFrequency: String = "Monthly" // "Monthly" or "Yearly"
+    @Persisted var buildingFrequency: String = "Monthly" // "Monthly" or "Annually"
     @Persisted var buildingAmount: Double = 0.0
     @Persisted var buildingRenewalDate: Date?
 
     // Landlord Insurance
     @Persisted var landlordProvider: String = ""
-    @Persisted var landlordFrequency: String = "Monthly" // "Monthly" or "Yearly"
+    @Persisted var landlordFrequency: String = "Monthly" // "Monthly" or "Annually"
     @Persisted var landlordAmount: Double = 0.0
     @Persisted var landlordRenewalDate: Date?
 
     // Same provider flag
     @Persisted var sameProvider: Bool = false
 
-    var buildingYearlyRepayment: Double {
-        if buildingFrequency == "Yearly" {
+    var buildingAnnualRepayment: Double {
+        if buildingFrequency == "Annually" {
             return buildingAmount
         } else if buildingFrequency == "Fortnightly" {
             return buildingAmount * 26
@@ -91,8 +91,8 @@ class PropertyInsurance: Object {
         }
     }
 
-    var landlordYearlyRepayment: Double {
-        if landlordFrequency == "Yearly" {
+    var landlordAnnualRepayment: Double {
+        if landlordFrequency == "Annually" {
             return landlordAmount
         } else if landlordFrequency == "Fortnightly" {
             return landlordAmount * 26
@@ -111,8 +111,12 @@ class PropertyInsurance: Object {
         }
     }
 
-    var totalYearlyRepayment: Double {
-        return buildingYearlyRepayment + landlordYearlyRepayment
+    var totalAnnualRepayment: Double {
+        if sameProvider {
+            // Combined policies should be counted once even though we store values in both fields.
+            return max(buildingAnnualRepayment, landlordAnnualRepayment)
+        }
+        return buildingAnnualRepayment + landlordAnnualRepayment
     }
 }
 

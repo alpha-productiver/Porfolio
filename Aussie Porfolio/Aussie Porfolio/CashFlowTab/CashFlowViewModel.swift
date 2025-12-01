@@ -34,10 +34,10 @@ struct CashFlowChartEntry {
 
 final class CashFlowViewModel {
     // MARK: - Output
-    private(set) var totalIncomeText: String = "$0"
-    private(set) var totalExpensesText: String = "$0"
+    private(set) var monthlyIncomeText: String = "$0"
+    private(set) var monthlyExpensesText: String = "$0"
     private(set) var netCashFlowText: String = "$0"
-    private(set) var isNetPositive: Bool = true
+    private(set) var isMonthlyPositive: Bool = true
     private(set) var annualIncomeText: String = "$0"
     private(set) var annualExpensesText: String = "$0"
     private(set) var annualNetText: String = "$0"
@@ -46,7 +46,6 @@ final class CashFlowViewModel {
     private(set) var liabilityItems: [CashFlowLiabilityItem] = []
     private(set) var normalizedTrendPoints: [CGFloat] = [0.5, 0.5, 0.5]
     private(set) var chartEntries: [CashFlowChartEntry] = []
-    private(set) var expensesBreakdownText: String = ""
     private(set) var chartTitles: [String] = ["Income", "Expenses", "Net"]
 
     var onDataChanged: (() -> Void)?
@@ -127,10 +126,10 @@ final class CashFlowViewModel {
         totalExpensesRaw = totalExpenses
         netRaw = net
 
-        totalIncomeText = formatCurrency(totalIncome)
-        totalExpensesText = formatCurrency(totalExpenses)
+        monthlyIncomeText = formatCurrency(totalIncome)
+        monthlyExpensesText = formatCurrency(totalExpenses)
         netCashFlowText = formatCurrency(net)
-        isNetPositive = net >= 0
+        isMonthlyPositive = net >= 0
         annualIncomeText = formatCurrency(totalIncome * 12)
         annualExpensesText = formatCurrency(totalExpenses * 12)
         let annualNet = net * 12
@@ -169,12 +168,15 @@ final class CashFlowViewModel {
                 dueText: dueText(for: liability.dueDate)
             )
         }
-        expensesBreakdownText = "Expenses: Base \(formatCurrency(totalBaseExpenses)) • Mgmt \(formatCurrency(totalMgmtExpenses)) • Insurance \(formatCurrency(totalInsurance)) • Loans \(formatCurrency(totalLoans)) • Liabilities \(formatCurrency(liabilityPayments))"
         onDataChanged?()
     }
 
     private func monthlyInsurance(for property: Property) -> Double {
         guard let insurance = property.insurance else { return 0 }
+        if insurance.sameProvider {
+            // Combined policy should only be counted once; assume building values carry the shared premium.
+            return max(insurance.buildingMonthlyRepayment, insurance.landlordMonthlyRepayment)
+        }
         return insurance.buildingMonthlyRepayment + insurance.landlordMonthlyRepayment
     }
 
