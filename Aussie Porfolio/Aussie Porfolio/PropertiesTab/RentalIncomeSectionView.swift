@@ -48,12 +48,13 @@ final class RentalIncomeSectionView: UIView {
 
     private var purchasePrice: Double?
     private var monthlyLoanRepayment: Double?
+    var onChange: (() -> Void)?
 
     private lazy var helperButton: UIButton = {
         let b = UIButton(type: .system)
         b.setImage(UIImage(systemName: "questionmark.circle"), for: .normal)
         b.tintColor = .secondaryLabel
-        b.addTarget(self, action: #selector(showHelper), for: .touchUpInside)
+        b.addTarget(self, action: #selector(showHelperAnnualCosts), for: .touchUpInside)
         return b
     }()
 
@@ -93,7 +94,8 @@ final class RentalIncomeSectionView: UIView {
     func setValues(weeklyIncome: Double, managementFeePercent: Double, expensesAmount: Double, expensesFrequencyMonthly: Bool) {
         weeklyIncomeField.textField.text = weeklyIncome > 0 ? Int(weeklyIncome).formattedWithSeparator() : ""
         managementFeeField.textField.text = managementFeePercent > 0 ? String(format: "%.2f", managementFeePercent) : ""
-        expensesAmountField.textField.text = expensesAmount > 0 ? Int(expensesAmount).formattedWithSeparator() : ""
+        let annualizedExpenses = expensesFrequencyMonthly ? expensesAmount * 12 : expensesAmount
+        expensesAmountField.textField.text = annualizedExpenses > 0 ? Int(annualizedExpenses).formattedWithSeparator() : ""
         updateAnnualSummary()
     }
 
@@ -117,12 +119,13 @@ final class RentalIncomeSectionView: UIView {
     func parsedExpenses() -> (amount: Double, isMonthly: Bool) {
         let raw = expensesAmountField.textField.text?.replacingOccurrences(of: ",", with: "") ?? ""
         let amt = Double(raw) ?? 0
-        // Expenses captured here are treated as monthly by default.
-        return (amt, true)
+        // Field is labelled $/year, so treat as annual.
+        return (amt, false)
     }
 
     @objc private func textDidChange() {
         updateAnnualSummary()
+        onChange?()
     }
 
     private func updateAnnualSummary() {
@@ -134,7 +137,7 @@ final class RentalIncomeSectionView: UIView {
 
         let annualMgmt = (managementPercent / 100) * annualIncome
         let annualLoan = (monthlyLoanRepayment ?? 0) * 12
-        let annualBase = expenses.amount * 12 // treated as monthly input
+        let annualBase = expenses.isMonthly ? expenses.amount * 12 : expenses.amount
         let totalCosts = annualBase + annualMgmt + annualLoan
         let net = annualIncome - totalCosts
 
@@ -163,9 +166,9 @@ final class RentalIncomeSectionView: UIView {
         annualSummaryLabel.attributedText = attributed
     }
 
-    @objc private func showHelper() {
+    @objc private func showHelperAnnualCosts() {
         let message = """
-Typical Australian house expenses (council, water, insurance, maintenance) often total $400–$600 per month. Use this as a guide and adjust for your property.
+Typical Australian house expenses (council, water, insurance, maintenance) often total $7,500 – $12,600 Anually. Use this as a guide and adjust for your property.
 """
         let alert = UIAlertController(title: "Expense Guide", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))

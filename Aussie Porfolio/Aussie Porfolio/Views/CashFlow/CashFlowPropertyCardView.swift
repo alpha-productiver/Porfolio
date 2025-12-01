@@ -78,8 +78,8 @@ public final class CashFlowPropertyCardView: UIView {
             $0.textColor = .secondaryLabel
         }
 
-        incomeTitleLabel.text = "Income"
-        expensesTitleLabel.text = "Expenses"
+        incomeTitleLabel.text = "Monthly Income"
+        expensesTitleLabel.text = "Monthly Expenses"
         netTitleLabel.text = "Net"
         nextPaymentTitleLabel.text = "Next payment"
 

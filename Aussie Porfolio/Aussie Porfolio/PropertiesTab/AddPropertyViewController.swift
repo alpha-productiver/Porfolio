@@ -117,6 +117,28 @@ final class AddPropertyViewController: UIViewController {
         l.numberOfLines = 0
         return l
     }()
+    private let summaryHeader = FormSectionHeader("Monthly Summary")
+    private let summaryLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .secondaryLabel
+        l.numberOfLines = 0
+        l.isHidden = true
+        return l
+    }()
+    private let annualSummaryHeader = FormSectionHeader("Annual Summary")
+    private let summaryCardBackground: UIColor = .secondarySystemGroupedBackground
+    private let summaryCardCornerRadius: CGFloat = 10
+    private let annualSummaryLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .secondaryLabel
+        l.numberOfLines = 0
+        l.isHidden = true
+        return l
+    }()
+    private let monthlySummaryContainer = UIView()
+    private let annualSummaryContainer = UIView()
 
     // Insurance
     private let insuranceSection = InsuranceSectionView()
@@ -141,9 +163,12 @@ final class AddPropertyViewController: UIViewController {
         updateCustomRepaymentTitle()
         addDoneToolbarToKeyboards()
         insuranceSection.layoutIfNeeded()
+        rentalIncomeSection.onChange = { [weak self] in self?.updateFinancialSummary() }
+        insuranceSection.onChange = { [weak self] in self?.updateFinancialSummary() }
         populateFieldsIfEditing()
         updateLoanNotes()
         updateRepaymentSummary()
+        updateFinancialSummary()
     }
 
     // MARK: - Nav
@@ -278,6 +303,32 @@ final class AddPropertyViewController: UIViewController {
 
         // Insurance section
         contentStack.addArrangedSubview(insuranceSection)
+
+        contentStack.addArrangedSubview(Divider())
+        contentStack.addArrangedSubview(summaryHeader)
+        configureSummaryContainer(monthlySummaryContainer, label: summaryLabel)
+        contentStack.addArrangedSubview(monthlySummaryContainer)
+        contentStack.addArrangedSubview(annualSummaryHeader)
+        configureSummaryContainer(annualSummaryContainer, label: annualSummaryLabel)
+        contentStack.addArrangedSubview(annualSummaryContainer)
+    }
+
+    private func configureSummaryContainer(_ container: UIView, label: UILabel) {
+        container.layer.cornerRadius = summaryCardCornerRadius
+        container.layer.masksToBounds = true
+        container.backgroundColor = summaryCardBackground
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+        ])
+
+        container.isHidden = true
     }
 
     private func configureStateMenu() {
@@ -337,48 +388,138 @@ final class AddPropertyViewController: UIViewController {
         return selectedFrequency.paymentsPerYear
     }
 
-    private func computeRepayment() -> (monthly: Double, yearly: Double) {
+    private struct RepaymentResult {
+        let perPayment: Double
+        let monthly: Double
+        let yearly: Double
+        let mode: String
+    }
+
+    private func computeRepayment() -> RepaymentResult? {
         guard let amount = parsedDouble(from: loanAmountField),
               let rate = parsedDouble(from: interestRateField) else {
-            return (0, 0)
+            return nil
         }
 
         let paymentsPerYear = currentPaymentsPerYear()
-        guard paymentsPerYear > 0 else { return (0, 0) }
+        guard paymentsPerYear > 0 else { return nil }
 
-        // Manual override
+        if interestOnlySwitch.isOn {
+            let perPayment = amount * (rate / 100) / paymentsPerYear
+            let monthly = perPayment * paymentsPerYear / 12
+            return RepaymentResult(perPayment: perPayment,
+                                   monthly: monthly,
+                                   yearly: perPayment * paymentsPerYear,
+                                   mode: "Interest-only")
+        }
+
         if enterRepaymentManuallySwitch.isOn,
            let customPayment = parsedDouble(from: customRepaymentField),
            customPayment > 0 {
             let monthly = (customPayment * paymentsPerYear) / 12
-            return (monthly, monthly * 12)
+            return RepaymentResult(perPayment: customPayment,
+                                   monthly: monthly,
+                                   yearly: monthly * 12,
+                                   mode: "Manual")
         }
 
         let periodicRate = (rate / 100) / paymentsPerYear
-        if interestOnlySwitch.isOn {
-            let monthly = amount * (rate / 100) / 12
-            return (monthly, monthly * 12)
-        } else {
-            let n = assumedLoanTermYears * paymentsPerYear
-            guard periodicRate > 0, n > 0 else { return (0, 0) }
-            let perPayment = amount * periodicRate / (1 - pow(1 + periodicRate, -n))
-            let monthly = perPayment * paymentsPerYear / 12
-            return (monthly, monthly * 12)
-        }
+        let n = assumedLoanTermYears * paymentsPerYear
+        guard periodicRate > 0, n > 0 else { return nil }
+        let perPayment = amount * periodicRate / (1 - pow(1 + periodicRate, -n))
+        let monthly = perPayment * paymentsPerYear / 12
+        return RepaymentResult(perPayment: perPayment,
+                               monthly: monthly,
+                               yearly: monthly * 12,
+                               mode: "P&I")
     }
 
     private func updateRepaymentSummary() {
-        let calc = computeRepayment()
-        guard calc.monthly > 0 else {
+        guard let calc = computeRepayment() else {
             repaymentSummaryLabel.isHidden = true
             rentalIncomeSection.updateFinancialContext(purchasePrice: parsedDouble(from: purchaseField), monthlyLoanRepayment: nil)
+            updateFinancialSummary()
             return
         }
 
         repaymentSummaryLabel.isHidden = false
-        let mode = interestOnlySwitch.isOn ? "Interest-only" : "P&I"
-        repaymentSummaryLabel.text = "Est. repayment (\(mode)): $\(Int(calc.monthly).formattedWithSeparator()) / month • $\(Int(calc.yearly).formattedWithSeparator()) / year"
+        let perPaymentFrequency = selectedFrequency.rawValue.lowercased()
+        repaymentSummaryLabel.text = "Est. repayment (\(calc.mode)): $\(Int(calc.perPayment).formattedWithSeparator()) per \(perPaymentFrequency) • $\(Int(calc.monthly).formattedWithSeparator()) / month • $\(Int(calc.yearly).formattedWithSeparator()) / year"
         rentalIncomeSection.updateFinancialContext(purchasePrice: parsedDouble(from: purchaseField), monthlyLoanRepayment: calc.monthly)
+        updateFinancialSummary()
+    }
+
+    private func updateFinancialSummary() {
+        let weeklyIncome = rentalIncomeSection.parsedWeeklyIncome()
+        let monthlyIncome = weeklyIncome * 52 / 12
+
+        let mgmtPercent = rentalIncomeSection.parsedManagementFeePercent()
+        let mgmtMonthly = monthlyIncome * (mgmtPercent / 100)
+
+        let expenses = rentalIncomeSection.parsedExpenses()
+        let otherMonthly = expenses.isMonthly ? expenses.amount : expenses.amount / 12
+        let insuranceMonthly = insuranceSection.currentMonthlyInsuranceEstimate()
+
+        let loanMonthly = computeRepayment()?.monthly ?? 0
+        let nonLoanExpenses = mgmtMonthly + otherMonthly + insuranceMonthly
+        let totalCosts = nonLoanExpenses + loanMonthly
+        let net = monthlyIncome - totalCosts
+
+        guard monthlyIncome > 0 || totalCosts > 0 else {
+            summaryLabel.isHidden = true
+            summaryLabel.text = nil
+            monthlySummaryContainer.isHidden = true
+            annualSummaryLabel.isHidden = true
+            annualSummaryLabel.text = nil
+            annualSummaryContainer.isHidden = true
+            return
+        }
+
+        summaryLabel.isHidden = false
+        monthlySummaryContainer.isHidden = false
+        let incomeText = Int(monthlyIncome).formattedWithSeparator()
+        let loanText = Int(loanMonthly).formattedWithSeparator()
+        let expenseText = Int(nonLoanExpenses).formattedWithSeparator()
+        let netText = Int(abs(net)).formattedWithSeparator()
+        let netPrefix = net < 0 ? "-$" : "$"
+        let netColor: UIColor = net >= 0 ? .systemGreen : .systemRed
+
+        let text = NSMutableAttributedString(
+            string: "Estimated monthly cash flow: ",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        )
+        text.append(NSAttributedString(
+            string: "\(netPrefix)\(netText)",
+            attributes: [.foregroundColor: netColor]
+        ))
+        text.append(NSAttributedString(
+            string: "\nIncome: $\(incomeText) • Loan: $\(loanText) • Expenses: $\(expenseText)",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        ))
+        summaryLabel.attributedText = text
+
+        let annualIncome = monthlyIncome * 12
+        let annualLoan = loanMonthly * 12
+        let annualExpenses = nonLoanExpenses * 12
+        let annualNet = annualIncome - annualLoan - annualExpenses
+        let annualNetPrefix = annualNet < 0 ? "-$" : "$"
+        let annualNetColor: UIColor = annualNet >= 0 ? .systemGreen : .systemRed
+
+        annualSummaryLabel.isHidden = false
+        annualSummaryContainer.isHidden = false
+        let annualText = NSMutableAttributedString(
+            string: "Estimated annual cash flow: ",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        )
+        annualText.append(NSAttributedString(
+            string: "\(annualNetPrefix)\(Int(abs(annualNet)).formattedWithSeparator())",
+            attributes: [.foregroundColor: annualNetColor]
+        ))
+        annualText.append(NSAttributedString(
+            string: "\nIncome: $\(Int(annualIncome).formattedWithSeparator()) • Loan: $\(Int(annualLoan).formattedWithSeparator()) • Expenses: $\(Int(annualExpenses).formattedWithSeparator())",
+            attributes: [.foregroundColor: UIColor.secondaryLabel]
+        ))
+        annualSummaryLabel.attributedText = annualText
     }
 
     // Add "Done" toolbar for number pads
@@ -530,7 +671,7 @@ final class AddPropertyViewController: UIViewController {
                 let customPerPeriod = enterRepaymentManuallySwitch.isOn ? (parsedDouble(from: customRepaymentField) ?? 0) : 0
                 let loanType = interestOnlySwitch.isOn ? "interest-only" : "principal-and-interest"
 
-                loanData = (amount, rate, loanType, calc.monthly, Int(paymentsPerYear), customPerPeriod, enterRepaymentManuallySwitch.isOn)
+                loanData = (amount, rate, loanType, calc?.monthly ?? 0, Int(paymentsPerYear), customPerPeriod, enterRepaymentManuallySwitch.isOn)
             }
         }
 
@@ -571,7 +712,7 @@ final class AddPropertyViewController: UIViewController {
                                     rentalIncome: rentalIncome,
                                     managementFeePercent: managementFeePercent,
                                     estimatedExpensesAmount: expensesParsed.amount,
-                                    expensesAreMonthly: expensesParsed.isMonthly,
+                                    expensesAreMonthly: false,
                                     loanData: loanData,
                                     insuranceData: insuranceData)
         } else {
@@ -585,7 +726,7 @@ final class AddPropertyViewController: UIViewController {
             property.rentalIncome = rentalIncome
             property.managementFeePercent = managementFeePercent
             property.estimatedExpensesAmount = expensesParsed.amount
-            property.expensesAreMonthly = expensesParsed.isMonthly
+            property.expensesAreMonthly = false
 
             if let loan = loanData {
                 let propertyLoan = PropertyLoan()

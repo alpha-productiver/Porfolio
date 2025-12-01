@@ -242,14 +242,17 @@ final class InsuranceSectionView: UIView {
         return l
     }()
 
-    private let totalInsuranceLabel: UILabel = {
+    private let totalBreakdownLabel: UILabel = {
         let l = UILabel()
-        l.font = .systemFont(ofSize: 15, weight: .bold)
-        l.textColor = .systemGreen
+        l.font = .systemFont(ofSize: 13, weight: .medium)
+        l.textColor = .systemBlue
         l.numberOfLines = 0
+        l.isHidden = true
         return l
     }()
+
     private var splitInsuranceCache: SplitInsuranceState?
+    var onChange: (() -> Void)?
 
     // MARK: - Lifecycle
     override init(frame: CGRect) {
@@ -591,8 +594,7 @@ final class InsuranceSectionView: UIView {
         landlordContainer.addArrangedSubview(landlordAnnuallyLabel)
 
         insuranceContainer.addArrangedSubview(landlordContainer)
-
-        insuranceContainer.addArrangedSubview(totalInsuranceLabel)
+        insuranceContainer.addArrangedSubview(totalBreakdownLabel)
 
         addSubview(insuranceContainer)
         NSLayoutConstraint.activate([
@@ -621,6 +623,7 @@ final class InsuranceSectionView: UIView {
                 self?.combinedSelectedFrequency = freq
                 self?.updateCombinedAnnuallyDisplay()
                 self?.updateTotalInsuranceDisplay()
+                self?.onChange?()
             }
         }
         combinedFrequencyButton.menu = UIMenu(children: actions)
@@ -635,6 +638,7 @@ final class InsuranceSectionView: UIView {
                 self?.buildingSelectedFrequency = freq
                 self?.updateBuildingAnnuallyDisplay()
                 self?.updateTotalInsuranceDisplay()
+                self?.onChange?()
             }
         }
         buildingFrequencyButton.menu = UIMenu(children: actions)
@@ -649,6 +653,7 @@ final class InsuranceSectionView: UIView {
                 self?.landlordSelectedFrequency = freq
                 self?.updateLandlordAnnuallyDisplay()
                 self?.updateTotalInsuranceDisplay()
+                self?.onChange?()
             }
         }
         landlordFrequencyButton.menu = UIMenu(children: actions)
@@ -749,6 +754,7 @@ final class InsuranceSectionView: UIView {
             combinedRenewalDatePicker.date = buildingRenewalDatePicker.date
             updateCombinedAnnuallyDisplay()
             updateTotalInsuranceDisplay()
+            onChange?()
         } else {
             combinedContainer.isHidden = true
             buildingContainer.isHidden = false
@@ -807,6 +813,7 @@ final class InsuranceSectionView: UIView {
             updateBuildingAnnuallyDisplay()
             updateLandlordAnnuallyDisplay()
             updateTotalInsuranceDisplay()
+            onChange?()
         }
     }
 
@@ -820,116 +827,107 @@ final class InsuranceSectionView: UIView {
     @objc private func combinedAmountDidChange(_ textField: UITextField) {
         updateCombinedAnnuallyDisplay()
         updateTotalInsuranceDisplay()
+        onChange?()
     }
 
     @objc private func buildingAmountDidChange(_ textField: UITextField) {
         updateBuildingAnnuallyDisplay()
         updateTotalInsuranceDisplay()
+        onChange?()
     }
 
     @objc private func landlordAmountDidChange(_ textField: UITextField) {
         updateLandlordAnnuallyDisplay()
         updateTotalInsuranceDisplay()
+        onChange?()
     }
 
     private func updateCombinedAnnuallyDisplay() {
-        guard let amount = parsedAmount(from: combinedAmountField) else {
-            combinedAnnuallyLabel.text = ""
-            return
-        }
-
-        if combinedSelectedFrequency == "Annually" {
-            combinedAnnuallyLabel.text = "Annually: $\(Int(amount).formattedWithSeparator())"
-        } else if combinedSelectedFrequency == "Fortnightly" {
-            let yearlyAmount = amount * 26
-            combinedAnnuallyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        } else {
-            let yearlyAmount = amount * 12
-            combinedAnnuallyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        }
+        // Individual labels are hidden; combined totals are shown via totalBreakdownLabel.
+        combinedAnnuallyLabel.text = ""
     }
 
     private func updateBuildingAnnuallyDisplay() {
-        guard let amount = parsedAmount(from: buildingAmountField) else {
-            buildingAnnuallyLabel.text = ""
-            return
-        }
-
-        if buildingSelectedFrequency == "Annually" {
-            buildingAnnuallyLabel.text = "Annually: $\(Int(amount).formattedWithSeparator())"
-        } else if buildingSelectedFrequency == "Fortnightly" {
-            let yearlyAmount = amount * 26
-            buildingAnnuallyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        } else {
-            let yearlyAmount = amount * 12
-            buildingAnnuallyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        }
+        buildingAnnuallyLabel.text = ""
     }
 
     private func updateLandlordAnnuallyDisplay() {
-        guard let amount = parsedAmount(from: landlordAmountField) else {
-            landlordAnnuallyLabel.text = ""
-            return
-        }
-
-        if landlordSelectedFrequency == "Annually" {
-            landlordAnnuallyLabel.text = "Annually: $\(Int(amount).formattedWithSeparator())"
-        } else if landlordSelectedFrequency == "Fortnightly" {
-            let yearlyAmount = amount * 26
-            landlordAnnuallyLabel.text = "Fortnightly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        } else {
-            let yearlyAmount = amount * 12
-            landlordAnnuallyLabel.text = "Monthly: $\(Int(amount).formattedWithSeparator()) • Annually: $\(Int(yearlyAmount).formattedWithSeparator())"
-        }
+        landlordAnnuallyLabel.text = ""
     }
 
     private func updateTotalInsuranceDisplay() {
-        let total: Double
+        let monthly = currentMonthlyInsuranceEstimate()
+        let annual = currentAnnualInsuranceEstimate()
+
+        guard monthly > 0 || annual > 0 else {
+            totalBreakdownLabel.isHidden = true
+            totalBreakdownLabel.text = nil
+            return
+        }
+
+        totalBreakdownLabel.isHidden = false
+        totalBreakdownLabel.text = "Monthly: $\(Int(monthly).formattedWithSeparator()) • Annually: $\(Int(annual).formattedWithSeparator())"
+    }
+
+    /// Estimate the monthly insurance spend based on current form values.
+    func currentMonthlyInsuranceEstimate() -> Double {
         if sameProviderCheckbox.isSelected {
-            guard let amount = parsedAmount(from: combinedAmountField) else {
-                totalInsuranceLabel.text = ""
-                return
+            guard let amount = parsedAmount(from: combinedAmountField) else { return 0 }
+            switch combinedSelectedFrequency {
+            case "Annually": return amount / 12
+            case "Fortnightly": return (amount * 26) / 12
+            default: return amount
             }
-
-            let annual: Double
-            if combinedSelectedFrequency == "Annually" {
-                annual = amount
-            } else if combinedSelectedFrequency == "Fortnightly" {
-                annual = amount * 26
-            } else {
-                annual = amount * 12
-            }
-            total = annual
-        } else {
-            let buildingAmount = parsedAmount(from: buildingAmountField) ?? 0
-            let landlordAmount = parsedAmount(from: landlordAmountField) ?? 0
-
-            let buildingAnnually: Double
-            if buildingSelectedFrequency == "Annually" {
-                buildingAnnually = buildingAmount
-            } else if buildingSelectedFrequency == "Fortnightly" {
-                buildingAnnually = buildingAmount * 26
-            } else {
-                buildingAnnually = buildingAmount * 12
-            }
-
-            let landlordAnnually: Double
-            if landlordSelectedFrequency == "Annually" {
-                landlordAnnually = landlordAmount
-            } else if landlordSelectedFrequency == "Fortnightly" {
-                landlordAnnually = landlordAmount * 26
-            } else {
-                landlordAnnually = landlordAmount * 12
-            }
-
-            total = buildingAnnually + landlordAnnually
         }
 
-        if total > 0 {
-            totalInsuranceLabel.text = "Total Annual Insurance: $\(Int(total).formattedWithSeparator())"
-        } else {
-            totalInsuranceLabel.text = ""
+        let buildingAmount = parsedAmount(from: buildingAmountField) ?? 0
+        let landlordAmount = parsedAmount(from: landlordAmountField) ?? 0
+
+        let buildingMonthly: Double
+        switch buildingSelectedFrequency {
+        case "Annually": buildingMonthly = buildingAmount / 12
+        case "Fortnightly": buildingMonthly = (buildingAmount * 26) / 12
+        default: buildingMonthly = buildingAmount
         }
+
+        let landlordMonthly: Double
+        switch landlordSelectedFrequency {
+        case "Annually": landlordMonthly = landlordAmount / 12
+        case "Fortnightly": landlordMonthly = (landlordAmount * 26) / 12
+        default: landlordMonthly = landlordAmount
+        }
+
+        return buildingMonthly + landlordMonthly
+    }
+
+    private func currentAnnualInsuranceEstimate() -> Double {
+        if sameProviderCheckbox.isSelected {
+            guard let amount = parsedAmount(from: combinedAmountField) else { return 0 }
+            switch combinedSelectedFrequency {
+            case "Annually": return amount
+            case "Fortnightly": return amount * 26
+            default: return amount * 12
+            }
+        }
+
+        let buildingAmount = parsedAmount(from: buildingAmountField) ?? 0
+        let landlordAmount = parsedAmount(from: landlordAmountField) ?? 0
+
+        let buildingAnnual: Double
+        switch buildingSelectedFrequency {
+        case "Annually": buildingAnnual = buildingAmount
+        case "Fortnightly": buildingAnnual = buildingAmount * 26
+        default: buildingAnnual = buildingAmount * 12
+        }
+
+        let landlordAnnual: Double
+        switch landlordSelectedFrequency {
+        case "Annually": landlordAnnual = landlordAmount
+        case "Fortnightly": landlordAnnual = landlordAmount * 26
+        default: landlordAnnual = landlordAmount * 12
+        }
+
+        return buildingAnnual + landlordAnnual
     }
 
     // MARK: - Helpers
@@ -991,7 +989,6 @@ final class InsuranceSectionView: UIView {
         combinedAnnuallyLabel.text = ""
         buildingAnnuallyLabel.text = ""
         landlordAnnuallyLabel.text = ""
-        totalInsuranceLabel.text = ""
         sameProviderCheckbox.isSelected = false
         combinedContainer.isHidden = true
         buildingContainer.isHidden = false
