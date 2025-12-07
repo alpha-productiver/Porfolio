@@ -325,6 +325,14 @@ class MainCoordinator: Coordinator {
         cashVC.coordinator = self
         nav.pushViewController(cashVC, animated: true)
     }
+    
+    func showCashFlow() {
+        guard let tabBarController else { return }
+        tabBarController.selectedIndex = TabIndex.cashFlow
+        if let nav = tabBarController.viewControllers?[TabIndex.cashFlow] as? UINavigationController {
+            nav.popToRootViewController(animated: false)
+        }
+    }
 
     func showLiabilities() {
         guard let tabBarController else { return }

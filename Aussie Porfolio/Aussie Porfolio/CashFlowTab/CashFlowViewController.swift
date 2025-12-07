@@ -15,11 +15,21 @@ final class CashFlowViewController: UIViewController {
         return stack
     }()
 
+    private let headerNoteLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Currently supports property cash flow only. Other cash flow types will arrive in a future release."
+        label.font = .systemFont(ofSize: 13)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        return label
+    }()
+
     private let monthlyCard: CardView = {
         let c = CardView(style: .neutral)
         c.titleLabel.text = "Monthly Cash Flow"
         let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
-        c.iconImageView.image = UIImage(systemName: "banknote.fill", withConfiguration: config)
+        c.iconImageView.image = UIImage(systemName: "dollarsign.arrow.circlepath", withConfiguration: config)
+        c.iconImageView.tintColor = .systemGray
         return c
     }()
 
@@ -27,7 +37,8 @@ final class CashFlowViewController: UIViewController {
         let c = CardView(style: .neutral)
         c.titleLabel.text = "Annual Cash Flow"
         let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
-        c.iconImageView.image = UIImage(systemName: "banknote.fill", withConfiguration: config)
+        c.iconImageView.image = UIImage(systemName: "calendar.badge.clock", withConfiguration: config)
+        c.iconImageView.tintColor = .systemGray
         return c
     }()
 
@@ -61,6 +72,11 @@ final class CashFlowViewController: UIViewController {
         title = "Cash Flow"
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = .systemGroupedBackground
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addPropertyTapped)
+        )
         buildLayout()
         bind()
     }
@@ -78,6 +94,8 @@ final class CashFlowViewController: UIViewController {
             make.edges.equalTo(scrollView.contentLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
         }
+
+        contentStack.addArrangedSubview(headerNoteLabel)
 
         let statRow = UIStackView(arrangedSubviews: [monthlyCard, annualCard])
         statRow.axis = .horizontal
@@ -164,6 +182,10 @@ final class CashFlowViewController: UIViewController {
     private func showProperty(id: String) {
         guard let property = viewModel.property(withId: id) else { return }
         coordinator?.showPropertyDetail(property)
+    }
+
+    @objc private func addPropertyTapped() {
+        coordinator?.showAddProperty()
     }
 
     private func configureStatCard(_ card: CardView, title: String, value: String, subtitle: String, positive: Bool) {

@@ -47,12 +47,13 @@ final class DashboardViewController: UIViewController {
         c.iconImageView.tintColor = .white
         return c
     }()
-
     // Mini cards (neutral style)
     private lazy var propertiesCard = makeMiniCard(title: "Properties", icon: "house.fill")
     private lazy var assetsCard     = makeMiniCard(title: "Other Assets", icon: "dollarsign.circle.fill")
     private lazy var cashCard       = makeMiniCard(title: "Cash", icon: "banknote.fill")
     private lazy var allocationCard = makeMiniCard(title: "Allocation", icon: "chart.pie.fill")
+    private lazy var monthlyCashflowCard = makeMiniCard(title: "Monthly Cashflow", icon: "dollarsign.arrow.circlepath")
+    private lazy var annualCashflowCard = makeMiniCard(title: "Annual Cashflow", icon: "calendar.badge.clock")
 
     // LVR Card
     private lazy var lvrCard = LVRCardView()
@@ -95,6 +96,10 @@ final class DashboardViewController: UIViewController {
         row2.axis = .horizontal; row2.spacing = 12; row2.distribution = .fillEqually
         stackView.addArrangedSubview(row2)
 
+        let row3 = UIStackView(arrangedSubviews: [monthlyCashflowCard, annualCashflowCard])
+        row3.axis = .horizontal; row3.spacing = 12; row3.distribution = .fillEqually
+        stackView.addArrangedSubview(row3)
+
         stackView.addArrangedSubview(lvrCard)
         stackView.addArrangedSubview(liabilitiesCard)
         stackView.addArrangedSubview(netWorthCard)
@@ -103,7 +108,7 @@ final class DashboardViewController: UIViewController {
         [portfolioValueCard, liabilitiesCard, netWorthCard].forEach {
             $0.snp.makeConstraints { $0.height.equalTo(160) }
         }
-        [propertiesCard, assetsCard, cashCard, allocationCard].forEach {
+        [propertiesCard, assetsCard, cashCard, allocationCard, monthlyCashflowCard, annualCashflowCard].forEach {
             $0.snp.makeConstraints { $0.height.equalTo(110) }
         }
         lvrCard.snp.makeConstraints { $0.height.equalTo(280) }
@@ -132,6 +137,17 @@ final class DashboardViewController: UIViewController {
         // Liabilities
         liabilitiesCard.valueLabel.text = viewModel.liabilitiesText
         liabilitiesCard.subtitleLabel.text = viewModel.liabilitiesSubtitleText
+
+        // Cashflow
+        monthlyCashflowCard.valueLabel.text = viewModel.monthlyCashflowText
+        monthlyCashflowCard.subtitleLabel.text = viewModel.monthlyCashflowSubtitleText.replacingOccurrences(of: " • ", with: "\n")
+        monthlyCashflowCard.valueLabel.textColor = viewModel.monthlyCashflowIsPositive ? .systemGreen : .systemRed
+        monthlyCashflowCard.iconImageView.tintColor = .systemGray
+
+        annualCashflowCard.valueLabel.text = viewModel.annualCashflowText
+        annualCashflowCard.subtitleLabel.text = viewModel.annualCashflowSubtitleText.replacingOccurrences(of: " • ", with: "\n")
+        annualCashflowCard.valueLabel.textColor = viewModel.annualCashflowIsPositive ? .systemGreen : .systemRed
+        annualCashflowCard.iconImageView.tintColor = .systemGray
 
         // Properties
         propertiesCard.valueLabel.text = viewModel.propertiesValueText
@@ -179,6 +195,7 @@ final class DashboardViewController: UIViewController {
         case "Properties": coordinator?.showProperties()
         case "Other Assets": coordinator?.showAssets()
         case "Cash": coordinator?.showCash()
+        case "Monthly Cashflow", "Annual Cashflow": coordinator?.showCashFlow()
         default: break
         }
     }

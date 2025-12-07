@@ -23,6 +23,12 @@ class DashboardViewModel {
     var netWorthSubtitleText: String = ""
     var liabilitiesText: String = ""
     var liabilitiesSubtitleText: String = ""
+    var monthlyCashflowText: String = ""
+    var monthlyCashflowSubtitleText: String = ""
+    var annualCashflowText: String = ""
+    var annualCashflowSubtitleText: String = ""
+    var monthlyCashflowIsPositive: Bool = true
+    var annualCashflowIsPositive: Bool = true
     var propertiesValueText: String = ""
     var propertiesCountText: String = ""
     var assetsValueText: String = ""
@@ -47,6 +53,11 @@ class DashboardViewModel {
     private var totalCashValue: Double = 0
     private var totalLiabilities: Double = 0
     private var totalPropertyLoans: Double = 0
+
+    private var monthlyIncomeTotal: Double = 0
+    private var monthlyExpenseTotal: Double = 0
+    private var monthlyNetTotal: Double = 0
+    private var annualNetTotal: Double = 0
 
     private let realmService: RealmService
     private var notificationTokens: [NotificationToken] = []
@@ -102,6 +113,9 @@ class DashboardViewModel {
         totalPortfolioValue = totalPropertyValue + totalAssetValue + totalCashValue
         netWorth = totalPortfolioValue - totalLiabilities
 
+        // Cashflow
+        calculateCashflow()
+
         // Format for display
         updateDisplayProperties()
     }
@@ -154,6 +168,21 @@ class DashboardViewModel {
         }
         lvrAssetText = formatCurrency(totalPropertyValue)
         lvrDebtText = formatCurrency(totalPropertyLoans)
+
+        // Cashflow cards
+        let monthlyNet = monthlyIncomeTotal - monthlyExpenseTotal
+        monthlyNetTotal = monthlyNet
+        monthlyCashflowText = formatCurrency(monthlyNet)
+        monthlyCashflowSubtitleText = ""
+        monthlyCashflowIsPositive = monthlyNet >= 0
+
+        let annualIncome = monthlyIncomeTotal * 12
+        let annualExpenses = monthlyExpenseTotal * 12
+        let annualNet = annualIncome - annualExpenses
+        annualNetTotal = annualNet
+        annualCashflowText = formatCurrency(annualNet)
+        annualCashflowSubtitleText = ""
+        annualCashflowIsPositive = annualNet >= 0
     }
 
     // MARK: - Helper Methods
@@ -192,6 +221,37 @@ class DashboardViewModel {
     
     var otherAssets: [Asset] {
         assets.filter { $0.type == "other" }
+    }
+
+    // MARK: - Cashflow helpers
+    private func calculateCashflow() {
+        monthlyIncomeTotal = 0
+        monthlyExpenseTotal = 0
+
+        // Property cashflow
+        for property in properties {
+            let monthlyIncome = property.rentalIncome * 52 / 12
+            let mgmt = (property.managementFeePercent / 100) * monthlyIncome
+            let baseExpenses = property.expensesAreMonthly ? property.estimatedExpensesAmount : property.estimatedExpensesAmount / 12
+            let mortgage = property.loan?.monthlyRepayment ?? 0
+            let insurance = monthlyInsurance(for: property)
+
+            monthlyIncomeTotal += monthlyIncome
+            monthlyExpenseTotal += mgmt + baseExpenses + mortgage + insurance
+        }
+
+        // Liabilities (non-property)
+        let liabilityPayments = liabilities.reduce(0) { $0 + max($1.minimumPayment, 0) }
+        monthlyExpenseTotal += liabilityPayments
+    }
+
+    private func monthlyInsurance(for property: Property) -> Double {
+        guard let insurance = property.insurance else { return 0 }
+        if insurance.sameProvider {
+            // Combined policy should only be counted once; assume building values carry the shared premium.
+            return max(insurance.buildingMonthlyRepayment, insurance.landlordMonthlyRepayment)
+        }
+        return insurance.buildingMonthlyRepayment + insurance.landlordMonthlyRepayment
     }
     
     deinit {

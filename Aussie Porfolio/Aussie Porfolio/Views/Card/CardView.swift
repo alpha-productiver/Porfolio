@@ -59,6 +59,8 @@ final class CardView: UIView {
 
         subtitleLabel.font = .systemFont(ofSize: 12)
         subtitleLabel.textColor = .tertiaryLabel
+        subtitleLabel.numberOfLines = 0
+        subtitleLabel.lineBreakMode = .byWordWrapping
 
         addSubview(iconImageView)
         addSubview(titleLabel)
